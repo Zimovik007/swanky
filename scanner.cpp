@@ -18,7 +18,7 @@ enum reserved_words{
 	_END,
 	_EXPORTS,
 	_FILE,
-	_FOR,Z
+	_FOR,
 	_FUNCTION,
 	_GOTO,
 	_IF,
@@ -107,41 +107,49 @@ map<string, int> rw = {
 	{"VAR", _VAR}, 
 	{"WHILE", _WHILE}, 
 	{"WITH", _WITH}, 
-	{"XOR", _XOR}, 
+	{"XOR", _XOR}
 };
 
 enum operators{
 	_PLUS,
 	_MINUS,
 	_MULT,
-	_DIV,
+	_DIVISION,
 	_ASS,
 	_LESS,
 	_LESS_EQUAL,
 	_MORE,
 	_MORE_EQUAL,
 	_EQUAL,
-	_NOT_EQUAL
+	_NOT_EQUAL,
+	_PLUS_EQUAL,
+	_MINUS_EQUAL,
+	_MULT_EQUAL,
+	_DIV_EQUAL
 };
 
 map<string, int> op = {
-	"+", _PLUS,
-	"-", _MINUS,
-	"*", _MULT,
-	"/", _DIV,
-	":=", _ASS,
-	"<", _LESS,
-	"<=", _LESS_EQUAL,
-	">", _MORE,
-	">=", _MORE_EQUAL,
-	"==", _EQUAL,
-	"<>", _NOT_EQUAL
+	{"+", _PLUS},
+	{"-", _MINUS},
+	{"*", _MULT},
+	{"/", _DIVISION},
+	{":=", _ASS},
+	{"<", _LESS},
+	{"<=", _LESS_EQUAL},
+	{">", _MORE},
+	{">=", _MORE_EQUAL},
+	{"==", _EQUAL},
+	{"<>", _NOT_EQUAL},
+	{"+=", _PLUS_EQUAL},
+	{"-=", _MINUS_EQUAL},
+	{"*=", _MULT_EQUAL},
+	{"/=", _DIV_EQUAL}
 };
 
 Scanner::Scanner(string text){
-	source = text;
+	fin.open(text);
 }
 
-string Scanner::getToken(){
+string Scanner::Next(){
 
 }

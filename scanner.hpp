@@ -6,7 +6,7 @@
 class Scanner{
 public:
 	Scanner(std::string text);
-	std::string getToken();
+	std::string Next();
 private:
 	std::fstream fin;
 	std::string source;
