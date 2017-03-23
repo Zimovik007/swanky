@@ -110,46 +110,93 @@ map<string, int> rw = {
 	{"XOR", _XOR}
 };
 
-enum operators{
-	_PLUS,
-	_MINUS,
-	_MULT,
-	_DIVISION,
-	_ASS,
-	_LESS,
-	_LESS_EQUAL,
-	_MORE,
-	_MORE_EQUAL,
-	_EQUAL,
-	_NOT_EQUAL,
-	_PLUS_EQUAL,
-	_MINUS_EQUAL,
-	_MULT_EQUAL,
-	_DIV_EQUAL
+enum types{
+	_OPERATOR,
+	_LITERAL,
+	_COMMENT,
+	_NUMBER,
+	_IDENT,
+	_SEPARATOR,
 };
 
-map<string, int> op = {
-	{"+", _PLUS},
-	{"-", _MINUS},
-	{"*", _MULT},
-	{"/", _DIVISION},
-	{":=", _ASS},
-	{"<", _LESS},
-	{"<=", _LESS_EQUAL},
-	{">", _MORE},
-	{">=", _MORE_EQUAL},
-	{"==", _EQUAL},
-	{"<>", _NOT_EQUAL},
-	{"+=", _PLUS_EQUAL},
-	{"-=", _MINUS_EQUAL},
-	{"*=", _MULT_EQUAL},
-	{"/=", _DIV_EQUAL}
+map<string, int> tp = {
+	{"OPERATOR", _OPERATOR},
+	{"LITERAL", _LITERAL},
+	{"COMMENT", _COMMENT},
+	{"NUMBER", _NUMBER},
+	{"IDENT", _IDENT},	
+	{"SEPARATOR", _SEPARATOR}
 };
+
+Token::Token(){
+	value = "";
+}
 
 Scanner::Scanner(string text){
 	fin.open(text);
+	cur_pos.y = 1;
+	cur_pos.x = 0;
 }
 
-string Scanner::Next(){
+int Scanner::change_pos(int change_y, int change_x){
+	if (change_y > 0){
+		cur_pos.x = 1;
+		cur_pos.y += change_y;	
+	}
+	else
+		cur_pos.x += change_x;
+	return 0;
+}
+
+Token Scanner::Next(){
+	Token token;
+	fin >> cur_symbol;
+	switch(cur_symbol){
+		case ' ': fin >> cur_symbol; while(cur_symbol == ' ') fin >> cur_symbol; break;
+		case '+': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol; 
+			switch(cur_symbol){
+				case '=': token.value += cur_symbol; fin >> cur_symbol; break;
+			}
+			break;
+		case '-': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol; 
+			switch(cur_symbol){
+				case '=': token.value += cur_symbol; fin >> cur_symbol; break;
+			}
+			break;
+		case '*': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol; 
+			switch(cur_symbol){
+				case '=': token.value += cur_symbol; fin >> cur_symbol; break;
+			}
+			break;
+		case '/': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol; 
+			switch(cur_symbol){
+				case '=': token.value += cur_symbol; fin >> cur_symbol; break;
+			}
+			break;
+		case '<': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol; 
+			switch(cur_symbol){
+				case '=': token.value += cur_symbol; fin >> cur_symbol; break;
+				case '>': token.value += cur_symbol; fin >> cur_symbol; break;
+			}
+			break;
+		case '>': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol; 
+			switch(cur_symbol){
+				case '=': token.value += cur_symbol; fin >> cur_symbol; break;
+			}
+			break;
+		case ':': token.value += cur_symbol; token.type = _SEPARATOR; fin >> cur_symbol; 
+			switch(cur_symbol){
+				case '=': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol; break;
+			}
+			break;
+		case '=': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol; break;
+	}
+}
+
+string Scanner::GetNumber(char c){
+
+}
+
+string Scanner::GetIdent(char c){
 
 }
