@@ -190,13 +190,30 @@ Token Scanner::Next(){
 			}
 			break;
 		case '=': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol; break;
+		case '"': token = GetLiteral(cur_symbol); token.type = _LITERAL; fin >> cur_symbol; break;
+		case '\'': token = GetLiteral(cur_symbol); token.type = _LITERAL; fin >> cur_symbol; break;
+		case ';': token.value += cur_symbol; token.type = _SEPARATOR;  fin >> cur_symbol; break;
+		default: 
+			if (((cur_symbol >= 65) && (cur_symbol <= 90)) || ((cur_symbol >= 97) && (cur_symbol <= 122))){
+				token = GetIdent(cur_symbol);
+				token.type = _IDENT; 
+			}	
+			else if ((cur_symbol >= 48) && (cur_symbol <= 57)){
+				token = GetNumber(cur_symbol);
+				token.type = _NUMBER;
+			}
+			break;
 	}
 }
 
-string Scanner::GetNumber(char c){
+Token Scanner::GetNumber(char c){
 
 }
 
-string Scanner::GetIdent(char c){
+Token Scanner::GetIdent(char c){
+
+}
+
+Token Scanner::GetLiteral(char c){
 
 }
