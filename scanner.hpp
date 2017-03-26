@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <map>
+#include <deque>
 
 typedef struct Position{
 	int x, y;
@@ -15,6 +16,7 @@ public:
 		token_pos = right.token_pos;
 		type = right.type;
 	}
+	int PrintToken();
 	pos token_pos;
 	std::string value;
 	int type;
@@ -28,7 +30,10 @@ public:
 	Token GetLiteral(char c);
 	Token GetNumber(char c);
 	Token GetIdent(char c);
+	int GetLengthDeque();
+	Token GetToken(int index);
 private:
+	std::deque<Token> dTokens;
 	int max_length_literal;
 	int max_length_ident;
 	std::fstream fin;
