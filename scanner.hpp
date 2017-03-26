@@ -25,7 +25,8 @@ public:
 class Scanner{
 public:
 	Scanner(std::string text);
-	int change_pos(int change_y, int change_x);
+	int ChangePos(int change_y, int change_x);
+	pos GetPos();
 	Token Next();
 	Token GetLiteral(char c);
 	Token GetNumber(char c);
