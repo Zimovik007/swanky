@@ -10,6 +10,11 @@ typedef struct Position{
 class Token{
 public:
 	Token();
+	Token& operator=(const Token& right){
+		value = right.value;
+		token_pos = right.token_pos;
+		type = right.type;
+	}
 	pos token_pos;
 	std::string value;
 	int type;
