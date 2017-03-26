@@ -117,6 +117,7 @@ enum types{
 	_NUMBER,
 	_IDENT,
 	_SEPARATOR,
+	_RESERVED_WORD,
 };
 
 map<string, int> tp = {
@@ -125,7 +126,8 @@ map<string, int> tp = {
 	{"COMMENT", _COMMENT},
 	{"NUMBER", _NUMBER},
 	{"IDENT", _IDENT},	
-	{"SEPARATOR", _SEPARATOR}
+	{"SEPARATOR", _SEPARATOR},
+	{"RESERVED WORD", _RESERVED_WORD}
 };
 
 Token::Token(){
@@ -136,6 +138,8 @@ Scanner::Scanner(string text){
 	fin.open(text);
 	cur_pos.y = 1;
 	cur_pos.x = 0;
+	max_length_ident = 16;
+	max_length_literal = 256;
 }
 
 int Scanner::change_pos(int change_y, int change_x){
@@ -150,7 +154,6 @@ int Scanner::change_pos(int change_y, int change_x){
 
 Token Scanner::Next(){
 	Token token;
-	fin >> cur_symbol;
 	switch(cur_symbol){
 		case ' ': fin >> cur_symbol; while(cur_symbol == ' ') fin >> cur_symbol; break;
 		case '+': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol; 
@@ -184,6 +187,11 @@ Token Scanner::Next(){
 				case '=': token.value += cur_symbol; fin >> cur_symbol; break;
 			}
 			break;
+		case '[': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol;
+		case ']': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol;
+		case '(': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol;
+		case ')': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol;
+		case ',': token.value += cur_symbol; token.type = _SEPARATOR; fin >> cur_symbol;
 		case ':': token.value += cur_symbol; token.type = _SEPARATOR; fin >> cur_symbol; 
 			switch(cur_symbol){
 				case '=': token.value += cur_symbol; token.type = _OPERATOR; fin >> cur_symbol; break;
@@ -194,26 +202,103 @@ Token Scanner::Next(){
 		case '\'': token = GetLiteral(cur_symbol); token.type = _LITERAL; fin >> cur_symbol; break;
 		case ';': token.value += cur_symbol; token.type = _SEPARATOR;  fin >> cur_symbol; break;
 		default: 
-			if (((cur_symbol >= 65) && (cur_symbol <= 90)) || ((cur_symbol >= 97) && (cur_symbol <= 122))){
+			if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || ((cur_symbol >= 'A') && (cur_symbol <= 'Z'))){
 				token = GetIdent(cur_symbol);
 				token.type = _IDENT; 
 			}	
-			else if ((cur_symbol >= 48) && (cur_symbol <= 57)){
+			else if ((cur_symbol >= '0') && (cur_symbol <= '9')){
 				token = GetNumber(cur_symbol);
 				token.type = _NUMBER;
 			}
 			break;
 	}
+	return token;
 }
 
 Token Scanner::GetNumber(char c){
-
+	Token num_token;
+	num_token.value = c;
+	int cnt_dot = 0;
+	while(true){
+		fin >> cur_symbol;
+		if ((cur_symbol >= '0') && (cur_symbol <= '9')){
+			num_token.value += cur_symbol;
+		}
+		else
+		if (cur_symbol == '.'){
+			cnt_dot++;
+			num_token.value += cur_symbol;
+		}
+		else{
+			break;
+		}
+	}
+	return num_token;
 }
 
 Token Scanner::GetIdent(char c){
-
+	Token ident_token;
+	ident_token.value = c;
+	int cnt = 1;
+	while(cnt <= max_length_ident){
+		cnt++;
+		fin >> cur_symbol;
+		if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || ((cur_symbol >= 'A') && (cur_symbol <= 'Z'))){
+			ident_token.value += cur_symbol;
+		}
+		else 
+		if ((cur_symbol >= '0') && (cur_symbol <= '9')){
+			ident_token.value += cur_symbol;
+		}
+		else{
+			break;
+		}
+	}
+	if (cnt > max_length_ident){
+		exit(-1);
+	}
+	return ident_token;
 }
 
 Token Scanner::GetLiteral(char c){
-
+	Token literal_token;
+	int cnt = 1;
+	while(cnt <= max_length_literal){
+		cnt++;
+		fin >> cur_symbol;
+		if ((cur_symbol != c) && (cur_symbol != '\'')){
+			literal_token.value += cur_symbol;
+		}
+		else{
+			char _c = cur_symbol;
+			fin >> cur_symbol;
+			if ((_c == c) && (c == '"')) break;
+			if (cur_symbol == '\''){
+				literal_token.value += cur_symbol;
+			}
+			else
+			if (cur_symbol == '#'){
+				string ascii_symbol = "";
+				fin >> cur_symbol;
+				while (cur_symbol != '\''){
+					if ((cur_symbol >= '0') && (cur_symbol <= '9')){
+						ascii_symbol += cur_symbol;
+						fin >> cur_symbol;
+					}
+					else{
+						exit(-1);
+					}
+				}
+				char ascii = stoi(ascii_symbol);
+				literal_token.value += ascii; 
+			}
+			else{
+				break;
+			}
+		}
+	}
+	if (cnt > max_length_literal){
+		exit(-1);
+	}
+	return literal_token;
 }

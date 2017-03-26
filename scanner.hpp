@@ -24,6 +24,8 @@ public:
 	Token GetNumber(char c);
 	Token GetIdent(char c);
 private:
+	int max_length_literal;
+	int max_length_ident;
 	std::fstream fin;
 	char cur_symbol;
 	pos cur_pos;
