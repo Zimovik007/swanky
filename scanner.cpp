@@ -225,7 +225,12 @@ Token Scanner::Next(){
 			case ']': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); break;
 			case ')': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); break;
 			case ',': token.value += cur_symbol; token.type = _SEPARATOR; cur_symbol = fin.get(); break;
-			case '.': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); break;
+			case '.': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); 
+				switch(cur_symbol){
+					ChangePos(0, 1);
+					case '.': token.value += cur_symbol; token.type = _SEPARATOR; cur_symbol = fin.get(); break;
+				}
+				break;
 			case ':': token.value += cur_symbol; token.type = _SEPARATOR; cur_symbol = fin.get();
 				switch(cur_symbol){
 					ChangePos(0, 1);
@@ -314,11 +319,11 @@ Token Scanner::GetIdent(char c){
 		else{
 			break;
 		}
-		ChangePos(0, 1);
 	}
 	if (cnt > max_length_ident){
 		exit(-1);
 	}
+	ChangePos(0, ident_token.value.length() - 1);
 	return ident_token;
 }
 
@@ -366,7 +371,6 @@ Token Scanner::GetLiteral(char c){
 	if (cnt > max_length_literal){
 		exit(-1);
 	}
-	cout << literal_token.value.size() << endl;
 	ChangePos(0, literal_token.value.length() + len_symbol);
 	return literal_token;
 }
