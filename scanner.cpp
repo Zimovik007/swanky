@@ -1,5 +1,6 @@
 #include "scanner.hpp"
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -121,14 +122,14 @@ enum types{
 	_RESERVED_WORD,
 };
 
-map<string, int> tp = {
-	{"OPERATOR", _OPERATOR},
-	{"LITERAL", _LITERAL},
-	{"COMMENT", _COMMENT},
-	{"NUMBER", _NUMBER},
-	{"IDENT", _IDENT},	
-	{"SEPARATOR", _SEPARATOR},
-	{"RESERVED WORD", _RESERVED_WORD}
+map<int, string> tp = {
+	{_OPERATOR, "OPERATOR"},
+	{_LITERAL, "LITERAL"},
+	{_COMMENT, "COMMENT"},
+	{_NUMBER, "NUMBER"},
+	{_IDENT, "IDENT"},
+	{_SEPARATOR, "SEPARATOR"},
+	{_RESERVED_WORD, "RESERVED WORDS"}
 };
 
 Token::Token(){
@@ -136,7 +137,17 @@ Token::Token(){
 }
 
 int Token::PrintToken(){
-	cout << value << " Тип: " << type << " Pos: (" << token_pos.y << ", " << token_pos.x << ")" << endl;
+	cout << value << " ";
+	if (value.length() < 30){
+		for (int i = 0; i < 30 - value.length(); i++){
+			cout << " ";
+		} 
+	}
+	cout << tp[type] << " ";
+	for (int i = 0; i < 20 - tp[type].length(); i++){
+		cout << " ";
+	}  
+	cout << "(" << token_pos.y << ", " << token_pos.x << ")" << endl;
 	return 0;
 }
 
@@ -244,7 +255,12 @@ Token Scanner::Next(){
 			default: 
 				if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || ((cur_symbol >= 'A') && (cur_symbol <= 'Z'))){
 					token = GetIdent(cur_symbol);
-					token.type = _IDENT;
+					string check_rw = token.value;
+					transform(check_rw.begin(), check_rw.end(), check_rw.begin(), ::toupper);
+					if (rw[check_rw] > 0)
+						token.type = _RESERVED_WORD;
+					else
+						token.type = _IDENT;
 					break; 
 				}	
 				else if ((cur_symbol >= '0') && (cur_symbol <= '9')){
