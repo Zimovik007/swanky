@@ -125,7 +125,6 @@ enum types{
 map<int, string> tp = {
 	{_OPERATOR, "OPERATOR"},
 	{_LITERAL, "LITERAL"},
-	{_COMMENT, "COMMENT"},
 	{_NUMBER, "NUMBER"},
 	{_IDENT, "IDENT"},
 	{_SEPARATOR, "SEPARATOR"},
@@ -137,17 +136,16 @@ Token::Token(){
 }
 
 int Token::PrintToken(){
-	cout << value << " ";
-	if (value.length() < 30){
-		for (int i = 0; i < 30 - value.length(); i++){
-			cout << " ";
-		} 
+	int offset_pos = 5 + to_string(token_pos.y).length() + to_string(token_pos.x).length();
+	cout << "(" << token_pos.y << ", " << token_pos.x << ") ";
+	for (int i = 0; i < 10 - offset_pos; i++){
+		cout << " ";
 	}
 	cout << tp[type] << " ";
-	for (int i = 0; i < 20 - tp[type].length(); i++){
+	for (int i = 0; i < 17 - tp[type].length(); i++){
 		cout << " ";
-	}  
-	cout << "(" << token_pos.y << ", " << token_pos.x << ")" << endl;
+	}
+	cout << value << endl; 
 	return 0;
 }
 
@@ -216,6 +214,10 @@ Token Scanner::Next(){
 				switch(cur_symbol){
 					ChangePos(0, 1);
 					case '=': token.value += cur_symbol; cur_symbol = fin.get(); break;
+					case '/': token.value = ""; cur_symbol = fin.get(); 
+						while((cur_symbol != '\n') && (cur_symbol != EOF))
+							cur_symbol = fin.get(); 
+						break;
 				}
 				break;
 			case '<': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); 
@@ -230,6 +232,14 @@ Token Scanner::Next(){
 					ChangePos(0, 1);
 					case '=': token.value += cur_symbol; cur_symbol = fin.get(); break;
 				}
+				break;
+			case '{': 
+				while((cur_symbol != '}') && (cur_symbol != EOF)){
+					cur_symbol = fin.get();
+					if (cur_symbol != '\n') ChangePos(0, 1);
+					else  ChangePos(1, 0);
+				} 
+				cur_symbol = fin.get(); 
 				break;
 			case '(': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); break;
 			case '[': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); break; 
