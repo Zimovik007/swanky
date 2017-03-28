@@ -35,6 +35,9 @@ public:
 	Token GetIdent(char c);
 	int GetLengthDeque();
 	Token GetToken(int index);
+	int ErrorHandler(Token token, std::string msg);
+	int AddError();
+	int GetCntErrors();
 private:
 	std::deque<Token> dTokens;
 	int max_length_literal;
@@ -42,4 +45,5 @@ private:
 	std::fstream fin;
 	char cur_symbol;
 	pos cur_pos;
+	int errors;
 };

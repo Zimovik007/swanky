@@ -115,7 +115,6 @@ map<string, int> rw = {
 enum types{
 	_OPERATOR,
 	_LITERAL,
-	_COMMENT,
 	_NUMBER,
 	_IDENT,
 	_SEPARATOR,
@@ -128,7 +127,7 @@ map<int, string> tp = {
 	{_NUMBER, "NUMBER"},
 	{_IDENT, "IDENT"},
 	{_SEPARATOR, "SEPARATOR"},
-	{_RESERVED_WORD, "RESERVED WORDS"}
+	{_RESERVED_WORD, "RESERVED WORDS"},
 };
 
 Token InitSimpleToken(Token token, char symbol, int type = -1){
@@ -159,6 +158,7 @@ int Token::PrintToken(){
 
 Scanner::Scanner(string text){
 	fin.open(text);
+	errors = 0;
 	cur_pos.y = 1;
 	cur_pos.x = 0;
 	max_length_ident = 16;
@@ -166,6 +166,24 @@ Scanner::Scanner(string text){
 	cur_symbol = fin.get();
 	while(cur_symbol != EOF)
 		dTokens.push_back(Next());
+}
+
+int Scanner::GetCntErrors(){
+	return errors;
+}
+
+int Scanner::AddError(){
+	errors++;
+	return 0;
+}
+
+int Scanner::ErrorHandler(Token token, string msg){
+	AddError();
+	cout << "====================" << endl;
+	cout << "Ошибка: " << msg << endl << "	";
+	token.PrintToken();
+	cout << "====================" << endl;
+	return 0;
 }
 
 int Scanner::GetLengthDeque(){
@@ -279,7 +297,7 @@ Token Scanner::Next(){
 					case '=': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); break;
 				}
 				break;
-				
+
 			default: 
 				if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || ((cur_symbol >= 'A') && (cur_symbol <= 'Z'))){
 					token = GetIdent(cur_symbol);
@@ -295,7 +313,10 @@ Token Scanner::Next(){
 					token = GetNumber(cur_symbol);
 					break;
 				}
-				exit(-1);
+				token = InitSimpleToken(token, cur_symbol);
+				ErrorHandler(token, "Обнаружен неизвестный символ");
+				cur_symbol = fin.get();
+				break;
 		}		
 	}	
 	return token;
@@ -323,6 +344,9 @@ Token Scanner::GetNumber(char c){
 			string num_source = num_token.source;
 			num_token.value += cur_symbol;
 			num_token.source += cur_symbol;
+			if (cnt_dot > 1){
+				ErrorHandler(num_token, "Обнаружена лишняя точка");
+			}
 			cur_symbol = fin.get();
 			if (cur_symbol == '.'){
 				Token n_token;
@@ -375,13 +399,14 @@ Token Scanner::GetIdent(char c){
 		}
 	}
 	if (cnt > max_length_ident){
-		exit(-1);
+		ErrorHandler(ident_token, "Превышена максимальная длина идентификатора");
 	}
 	ChangePos(0, ident_token.value.length() - 1);
 	return ident_token;
 }
 
 Token Scanner::GetLiteral(char c){
+	bool error = false;
 	Token literal_token;
 	literal_token.token_pos = cur_pos;
 	literal_token.source = c;
@@ -418,12 +443,17 @@ Token Scanner::GetLiteral(char c){
 						cur_symbol = fin.get();
 					}
 					else{
-						exit(-1);
+						error = true;
+						literal_token.source += cur_symbol;
+						ErrorHandler(literal_token, "Ошибка в оформлении литерала");
+						cur_symbol = fin.get();
 					}
 				}
 				literal_token.source += '\'';
-				char ascii = stoi(ascii_symbol);
-				literal_token.value += ascii; 
+				if (!error){
+					char ascii = stoi(ascii_symbol);
+					literal_token.value += ascii;
+				}
 			}
 			else{
 				break;
@@ -432,7 +462,7 @@ Token Scanner::GetLiteral(char c){
 	}
 	literal_token.source += c;
 	if (cnt > max_length_literal){
-		exit(-1);
+		ErrorHandler(literal_token, "Первышена максимальная длина литерала");
 	}
 	ChangePos(0, literal_token.value.length() + len_symbol);
 	return literal_token;
