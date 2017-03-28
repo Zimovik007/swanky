@@ -131,6 +131,8 @@ map<int, string> tp = {
 	{_RESERVED_WORD, "RESERVED WORDS"}
 };
 
+
+
 Token::Token(){
 	value = "";
 }
@@ -145,7 +147,7 @@ int Token::PrintToken(){
 	for (int i = 0; i < 17 - tp[type].length(); i++){
 		cout << " ";
 	}
-	cout << value << endl; 
+	cout << value << "  ~" << source << "~" << endl; 
 	return 0;
 }
 
@@ -192,45 +194,45 @@ Token Scanner::Next(){
 			case ' ': cur_symbol = fin.get(); break;
 			case '\t': cur_symbol = fin.get(); break;
 			case '\n': cur_symbol = fin.get(); ChangePos(1, 0); break;
-			case '+': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); 
+			case '+': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token.value += cur_symbol; cur_symbol = fin.get(); break;
+					case '=': token.value += cur_symbol; token.source = token.value; cur_symbol = fin.get(); break;
 				}
 				break;
-			case '-': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); 
+			case '-': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token.value += cur_symbol; cur_symbol = fin.get(); break;
+					case '=': token.value += cur_symbol; token.source = token.value; cur_symbol = fin.get(); break;
 				}
 				break;
-			case '*': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); 
+			case '*': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token.value += cur_symbol; cur_symbol = fin.get(); break;
+					case '=': token.value += cur_symbol; token.source = token.value; cur_symbol = fin.get(); break;
 				}
 				break;
-			case '/': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); 
+			case '/': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token.value += cur_symbol; cur_symbol = fin.get(); break;
+					case '=': token.value += cur_symbol; token.source = token.value; cur_symbol = fin.get(); break;
 					case '/': token.value = ""; cur_symbol = fin.get(); 
 						while((cur_symbol != '\n') && (cur_symbol != EOF))
 							cur_symbol = fin.get(); 
 						break;
 				}
 				break;
-			case '<': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); 
+			case '<': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token.value += cur_symbol; cur_symbol = fin.get(); break;
-					case '>': token.value += cur_symbol; cur_symbol = fin.get(); break;
+					case '=': token.value += cur_symbol; token.source = token.value; cur_symbol = fin.get(); break;
+					case '>': token.value += cur_symbol; token.source = token.value; cur_symbol = fin.get(); break;
 				}
 				break;
-			case '>': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); 
+			case '>': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token.value += cur_symbol; cur_symbol = fin.get(); break;
+					case '=': token.value += cur_symbol; token.source = token.value; cur_symbol = fin.get(); break;
 				}
 				break;
 			case '{': 
@@ -241,27 +243,27 @@ Token Scanner::Next(){
 				} 
 				cur_symbol = fin.get(); 
 				break;
-			case '(': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); break;
-			case '[': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); break; 
-			case ']': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); break;
-			case ')': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); break;
-			case ',': token.value += cur_symbol; token.type = _SEPARATOR; cur_symbol = fin.get(); break;
-			case '.': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); 
+			case '(': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); break;
+			case '[': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); break; 
+			case ']': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); break;
+			case ')': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); break;
+			case ',': token.value += cur_symbol; token.source = token.value; token.type = _SEPARATOR; cur_symbol = fin.get(); break;
+			case '.': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '.': token.value += cur_symbol; token.type = _SEPARATOR; cur_symbol = fin.get(); break;
+					case '.': token.value += cur_symbol; token.source = token.value; token.type = _SEPARATOR; cur_symbol = fin.get(); break;
 				}
 				break;
-			case ':': token.value += cur_symbol; token.type = _SEPARATOR; cur_symbol = fin.get();
+			case ':': token.value += cur_symbol; token.source = token.value; token.type = _SEPARATOR; cur_symbol = fin.get();
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); break;
+					case '=': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); break;
 				}
 				break;
-			case '=': token.value += cur_symbol; token.type = _OPERATOR; cur_symbol = fin.get(); break;
+			case '=': token.value += cur_symbol; token.source = token.value; token.type = _OPERATOR; cur_symbol = fin.get(); break;
 			case '"': token = GetLiteral(cur_symbol); token.type = _LITERAL; break;
 			case '\'': token = GetLiteral(cur_symbol); token.type = _LITERAL; break;
-			case ';': token.value += cur_symbol; token.type = _SEPARATOR;  cur_symbol = fin.get(); break;
+			case ';': token.value += cur_symbol; token.source = token.value; token.type = _SEPARATOR;  cur_symbol = fin.get(); break;
 			default: 
 				if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || ((cur_symbol >= 'A') && (cur_symbol <= 'Z'))){
 					token = GetIdent(cur_symbol);
@@ -285,6 +287,7 @@ Token Scanner::Next(){
 
 Token Scanner::GetNumber(char c){
 	Token num_token;
+	num_token.source = c;
 	num_token.value = c;
 	num_token.token_pos = cur_pos;
 	num_token.type = _NUMBER;
@@ -293,6 +296,7 @@ Token Scanner::GetNumber(char c){
 		cur_symbol = fin.get();
 		if ((cur_symbol >= '0') && (cur_symbol <= '9')){
 			ChangePos(0, 1);
+			num_token.source += cur_symbol;
 			num_token.value += cur_symbol;
 		}
 		else
@@ -300,15 +304,19 @@ Token Scanner::GetNumber(char c){
 			ChangePos(0, 1);
 			cnt_dot++;
 			string num = num_token.value;
+			string num_source = num_token.source;
 			num_token.value += cur_symbol;
+			num_token.source += cur_symbol;
 			cur_symbol = fin.get();
 			if (cur_symbol == '.'){
 				Token n_token;
 				n_token.value = num;
+				n_token.source = num_source;
 				n_token.type = _NUMBER;
 				n_token.token_pos = num_token.token_pos;
 				dTokens.push_back(n_token);
 				num_token.value = "..";
+				num_token.source = num_token.value;
 				num_token.type = _SEPARATOR;
 				num_token.token_pos = cur_pos;
 				ChangePos(0, 1);
@@ -318,6 +326,7 @@ Token Scanner::GetNumber(char c){
 			else
 			if ((cur_symbol >= '0') && (cur_symbol <= '9')){
 				num_token.value += cur_symbol;
+				num_token.source += cur_symbol;
 			}
 		}
 		else{
@@ -330,6 +339,7 @@ Token Scanner::GetNumber(char c){
 Token Scanner::GetIdent(char c){
 	Token ident_token;
 	ident_token.value = c;
+	ident_token.source = c;
 	ident_token.token_pos = cur_pos;
 	int cnt = 1;
 	while(cnt <= max_length_ident){
@@ -337,10 +347,12 @@ Token Scanner::GetIdent(char c){
 		cur_symbol = fin.get();
 		if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || ((cur_symbol >= 'A') && (cur_symbol <= 'Z'))){
 			ident_token.value += cur_symbol;
+			ident_token.source += cur_symbol;
 		}
 		else 
 		if ((cur_symbol >= '0') && (cur_symbol <= '9')){
 			ident_token.value += cur_symbol;
+			ident_token.source += cur_symbol;
 		}
 		else{
 			break;
@@ -356,12 +368,14 @@ Token Scanner::GetIdent(char c){
 Token Scanner::GetLiteral(char c){
 	Token literal_token;
 	literal_token.token_pos = cur_pos;
+	literal_token.source = c;
 	int len_symbol = 0;
 	int cnt = 1;
 	while(cnt <= max_length_literal){
 		cnt++;
 		cur_symbol = fin.get();
 		if (((c == '\'') && (cur_symbol != '\'')) || ((c == '"') && (cur_symbol != '"'))){
+			literal_token.source += cur_symbol;
 			literal_token.value += cur_symbol;
 		}
 		else{
@@ -369,16 +383,21 @@ Token Scanner::GetLiteral(char c){
 			cur_symbol = fin.get();
 			if ((_c == c) && (c == '"')) break;
 			if (cur_symbol == '\''){
+				literal_token.source += cur_symbol;
+				literal_token.source += cur_symbol;
 				literal_token.value += cur_symbol;
 			}
 			else
 			if (cur_symbol == '#'){
+				literal_token.source += '\'';
+				literal_token.source += cur_symbol;
 				len_symbol = 2;
 				string ascii_symbol = "";
 				cur_symbol = fin.get();
 				len_symbol++;
 				while (cur_symbol != '\''){
-					if ((cur_symbol >= '0') && (cur_symbol <= '9')){	
+					if ((cur_symbol >= '0') && (cur_symbol <= '9')){
+						literal_token.source += cur_symbol;	
 						ascii_symbol += cur_symbol;
 						cur_symbol = fin.get();
 					}
@@ -386,6 +405,7 @@ Token Scanner::GetLiteral(char c){
 						exit(-1);
 					}
 				}
+				literal_token.source += '\'';
 				char ascii = stoi(ascii_symbol);
 				literal_token.value += ascii; 
 			}
@@ -394,6 +414,7 @@ Token Scanner::GetLiteral(char c){
 			}
 		}
 	}
+	literal_token.source += c;
 	if (cnt > max_length_literal){
 		exit(-1);
 	}

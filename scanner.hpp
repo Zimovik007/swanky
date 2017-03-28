@@ -15,10 +15,12 @@ public:
 		value = right.value;
 		token_pos = right.token_pos;
 		type = right.type;
+		source = right.source;
 	}
 	int PrintToken();
 	pos token_pos;
 	std::string value;
+	std::string source;
 	int type;
 };
 
