@@ -154,6 +154,14 @@ Token::Token(string _value, string _source, pos _token_pos, int _type){
 	type = _type;
 }
 
+Token::Token(char _value, char _source, pos _token_pos, int _type){
+	if (_value)
+		value += _value;
+	source += _source;
+	token_pos = _token_pos;
+	type = _type;
+}
+
 int Token::PrintToken(){
 	int offset_pos = 5 + to_string(token_pos.y).length() + to_string(token_pos.x).length();
 	cout << "(" << token_pos.y << ", " << token_pos.x << ") ";
@@ -243,28 +251,28 @@ Token Scanner::Next(){
 			case '+': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token = InitSimpleToken(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
 
 			case '-': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token = InitSimpleToken(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
 
 			case '*': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token = InitSimpleToken(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
 
 			case '/': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token = InitSimpleToken(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 					case '/': token.value = ""; cur_symbol = fin.get(); 
 						while((cur_symbol != '\n') && (cur_symbol != EOF))
 							cur_symbol = fin.get(); 
@@ -275,15 +283,15 @@ Token Scanner::Next(){
 			case '<': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token = InitSimpleToken(token, cur_symbol); cur_symbol = fin.get(); break;
-					case '>': token = InitSimpleToken(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '>': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
 
 			case '>': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					ChangePos(0, 1);
-					case '=': token = InitSimpleToken(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
 
@@ -325,7 +333,7 @@ Token Scanner::Next(){
 					token = GetNumber(cur_symbol);
 					break;
 				}
-				token = InitSimpleToken(token, cur_symbol);
+				AddSymbol(token, cur_symbol);
 				ErrorHandler(token, "Обнаружен неизвестный символ");
 				cur_symbol = fin.get();
 				break;
@@ -335,16 +343,13 @@ Token Scanner::Next(){
 }
 
 Token Scanner::GetNumber(char c){
-	Token num_token;
-	num_token = InitSimpleToken(num_token, c, _NUMBER);
-	num_token.token_pos = cur_pos;
+	Token num_token(c, c, cur_pos, _NUMBER);
 	int cnt_dot = 0;
 	while(true){
 		cur_symbol = fin.get();
 		if ((cur_symbol >= '0') && (cur_symbol <= '9')){
 			ChangePos(0, 1);
-			num_token.source += cur_symbol;
-			num_token.value += cur_symbol;
+			AddSymbol(num_token, cur_symbol);
 		}
 		else
 		if (cur_symbol == '.'){
@@ -375,34 +380,27 @@ Token Scanner::GetNumber(char c){
 }
 
 Token Scanner::GetIdent(char c){
-	Token ident_token;
-	ident_token.value = c;
-	ident_token.source = c;
-	ident_token.token_pos = cur_pos;
+	Token ident_token(c, c, cur_pos, _IDENT);
 	int cnt = 1;
 	while(cnt <= max_length_ident){
 		cnt++;
 		cur_symbol = fin.get();
-		if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || ((cur_symbol >= 'A') && (cur_symbol <= 'Z')))
-			AddSymbol(ident_token, cur_symbol);
-		else 
-		if ((cur_symbol >= '0') && (cur_symbol <= '9'))
-			AddSymbol(ident_token, cur_symbol);
+		if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || 
+			((cur_symbol >= 'A') && (cur_symbol <= 'Z')) ||
+			((cur_symbol >= '0') && (cur_symbol <= '9')))
+				AddSymbol(ident_token, cur_symbol);
 		else
 			break;
 	}
-	if (cnt > max_length_ident){
+	if (cnt > max_length_ident)
 		ErrorHandler(ident_token, "Превышена максимальная длина идентификатора");
-	}
 	ChangePos(0, ident_token.value.length() - 1);
 	return ident_token;
 }
 
 Token Scanner::GetLiteral(char c){
 	bool error = false;
-	Token literal_token;
-	literal_token.token_pos = cur_pos;
-	literal_token.source = c;
+	Token literal_token(0, c, cur_pos, _LITERAL);
 	int len_symbol = 0;
 	int cnt = 1;
 	while(cnt <= max_length_literal){
@@ -451,9 +449,8 @@ Token Scanner::GetLiteral(char c){
 		}
 	}
 	literal_token.source += c;
-	if (cnt > max_length_literal){
+	if (cnt > max_length_literal)
 		ErrorHandler(literal_token, "Первышена максимальная длина литерала");
-	}
 	ChangePos(0, literal_token.value.length() + len_symbol);
 	return literal_token;
 }

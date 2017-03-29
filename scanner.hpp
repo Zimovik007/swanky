@@ -12,6 +12,7 @@ class Token{
 public:
 	Token();
 	Token(std::string _value, std::string _source, pos _token_pos, int _type);
+	Token(char _value, char _source, pos _token_pos, int _type);
 	Token& operator=(const Token& right){
 		value = right.value;
 		token_pos = right.token_pos;
