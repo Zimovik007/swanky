@@ -233,7 +233,7 @@ Token Scanner::Next(){
 	Token token;
 	while ((token.value == "") && (cur_symbol != EOF)){
 		ChangePos(0, 1);
-		token.token_pos = GetPos();
+		token.token_pos = cur_pos;
 		switch(cur_symbol){
 			case ' ': cur_symbol = fin.get(); break;
 			case '\t': cur_symbol = fin.get(); break;
@@ -250,29 +250,25 @@ Token Scanner::Next(){
 
 			case '+': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
-					ChangePos(0, 1);
-					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
 
 			case '-': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
-					ChangePos(0, 1);
-					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
 
 			case '*': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
-					ChangePos(0, 1);
-					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
 
 			case '/': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
-					ChangePos(0, 1);
-					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 					case '/': token.value = ""; cur_symbol = fin.get(); 
 						while((cur_symbol != '\n') && (cur_symbol != EOF))
 							cur_symbol = fin.get(); 
@@ -282,16 +278,14 @@ Token Scanner::Next(){
 
 			case '<': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
-					ChangePos(0, 1);
-					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
-					case '>': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '>': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
 
 			case '>': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
-					ChangePos(0, 1);
-					case '=': AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
+					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
 
@@ -306,15 +300,13 @@ Token Scanner::Next(){
 			
 			case '.': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
-					ChangePos(0, 1);
-					case '.': token = InitSimpleToken(token, cur_symbol, _SEPARATOR); cur_symbol = fin.get(); break;
+					case '.': ChangePos(0, 1); token = InitSimpleToken(token, cur_symbol, _SEPARATOR); cur_symbol = fin.get(); break;
 				}
 				break;
 
 			case ':': token = InitSimpleToken(token, cur_symbol, _SEPARATOR); cur_symbol = fin.get();
 				switch(cur_symbol){
-					ChangePos(0, 1);
-					case '=': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); break;
+					case '=': ChangePos(0, 1); token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); break;
 				}
 				break;
 
@@ -325,8 +317,6 @@ Token Scanner::Next(){
 					transform(check_rw.begin(), check_rw.end(), check_rw.begin(), ::toupper);
 					if (rw[check_rw] > 0)
 						token.type = _RESERVED_WORD;
-					else
-						token.type = _IDENT;
 					break; 
 				}	
 				else if ((cur_symbol >= '0') && (cur_symbol <= '9')){
@@ -347,13 +337,10 @@ Token Scanner::GetNumber(char c){
 	int cnt_dot = 0;
 	while(true){
 		cur_symbol = fin.get();
-		if ((cur_symbol >= '0') && (cur_symbol <= '9')){
-			ChangePos(0, 1);
+		if ((cur_symbol >= '0') && (cur_symbol <= '9'))
 			AddSymbol(num_token, cur_symbol);
-		}
 		else
 		if (cur_symbol == '.'){
-			ChangePos(0, 1);
 			cnt_dot++;
 			string num = num_token.value;
 			string num_source = num_token.source;
@@ -364,9 +351,10 @@ Token Scanner::GetNumber(char c){
 			if (cur_symbol == '.'){
 				Token n_token(num, num_source, num_token.token_pos, _NUMBER);
 				dTokens.push_back(n_token);
+				ChangePos(0, n_token.source.length());
 				Token double_dot("..", "..", cur_pos, _SEPARATOR);
-				ChangePos(0, 1);
 				cur_symbol = fin.get();
+				ChangePos(0, 1);
 				return double_dot;
 			}
 			else
@@ -376,6 +364,7 @@ Token Scanner::GetNumber(char c){
 		else 
 			break;
 	}
+	ChangePos(0, num_token.source.length() - 1);
 	return num_token;
 }
 
