@@ -147,6 +147,13 @@ Token::Token(){
 	value = "";
 }
 
+Token::Token(string _value, string _source, pos _token_pos, int _type){
+	value = _value;
+	source = _source;
+	token_pos = _token_pos;
+	type = _type;
+}
+
 int Token::PrintToken(){
 	int offset_pos = 5 + to_string(token_pos.y).length() + to_string(token_pos.x).length();
 	cout << "(" << token_pos.y << ", " << token_pos.x << ") ";
@@ -350,19 +357,12 @@ Token Scanner::GetNumber(char c){
 				ErrorHandler(num_token, "Обнаружена лишняя точка");
 			cur_symbol = fin.get();
 			if (cur_symbol == '.'){
-				Token n_token;
-				n_token.value = num;
-				n_token.source = num_source;
-				n_token.type = _NUMBER;
-				n_token.token_pos = num_token.token_pos;
+				Token n_token(num, num_source, num_token.token_pos, _NUMBER);
 				dTokens.push_back(n_token);
-				num_token.value = "..";
-				num_token.source = num_token.value;
-				num_token.type = _SEPARATOR;
-				num_token.token_pos = cur_pos;
+				Token double_dot("..", "..", cur_pos, _SEPARATOR);
 				ChangePos(0, 1);
 				cur_symbol = fin.get();
-				return num_token;
+				return double_dot;
 			}
 			else
 			if ((cur_symbol >= '0') && (cur_symbol <= '9'))
