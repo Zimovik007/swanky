@@ -392,8 +392,12 @@ Token Scanner::GetNumber(char c){
 	}
 	if (cnt_dot >= 1) num_token.type = _FLOAT;
 	if (cnt_dot > 1) ErrorHandler(num_token, "invalid float");
-	if (e){
-		num_token.value = to_string(stof(num_token.value));
+	if (e) num_token.value = to_string(stof(num_token.value));
+	try{
+		if (num_token.type == _INTEGER) int check_int_overflow = stoi(num_token.value);
+	}
+	catch(out_of_range Exep){
+		ErrorHandler(num_token, "integer overflow");
 	}
 	ChangePos(0, num_token.source.length() - 1);
 	return num_token;
