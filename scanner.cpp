@@ -199,8 +199,7 @@ Token Scanner::Next(){
 			case ',': token = InitSimpleToken(token, cur_symbol, _SEPARATOR); cur_symbol = fin.get(); break;
 			case '=': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); break;
 			case ';': token = InitSimpleToken(token, cur_symbol, _SEPARATOR); cur_symbol = fin.get(); break;
-			case '"': token = GetLiteral(cur_symbol); token.type = _LITERAL; break;
-			case '\'': token = GetLiteral(cur_symbol); token.type = _LITERAL; break;
+			case '\'': token = GetLiteral(cur_symbol); break;
 			case '+': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
@@ -427,12 +426,10 @@ Token Scanner::GetLiteral(char c){
 	while(true && cur_symbol != EOF){
 		cnt++;
 		cur_symbol = fin.get();
-		if (((c == '\'') && (cur_symbol != '\'')) || ((c == '"') && (cur_symbol != '"')))
+		if (cur_symbol != '\'')
 			AddSymbol(literal_token, cur_symbol);
 		else{
-			char _c = cur_symbol;
 			cur_symbol = fin.get();
-			if ((_c == '"') && (c == '"')) break;
 			if (cur_symbol == '\''){
 				literal_token.source += cur_symbol;
 				AddSymbol(literal_token, cur_symbol);
