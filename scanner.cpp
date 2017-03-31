@@ -115,19 +115,21 @@ map<string, int> rw = {
 enum types{
 	_OPERATOR,
 	_LITERAL,
-	_NUMBER,
+	_INTEGER,
+	_FLOAT,
 	_IDENT,
 	_SEPARATOR,
 	_RESERVED_WORD,
 };
 
 map<int, string> tp = {
-	{_OPERATOR, "OPERATOR"},
-	{_LITERAL, "LITERAL"},
-	{_NUMBER, "NUMBER"},
-	{_IDENT, "IDENT"},
-	{_SEPARATOR, "SEPARATOR"},
-	{_RESERVED_WORD, "RESERVED WORDS"},
+	{_OPERATOR, "operator"},
+	{_LITERAL, "string literal"},
+	{_INTEGER, "integer literal"},
+	{_FLOAT, "float literal"},
+	{_IDENT, "identifier"},
+	{_SEPARATOR, "separator"},
+	{_RESERVED_WORD, "reserved"},
 };
 
 Token InitSimpleToken(Token token, char symbol, int type = -1){
@@ -199,10 +201,7 @@ int Scanner::AddError(){
 
 int Scanner::ErrorHandler(Token token, string msg){
 	AddError();
-	cout << "====================" << endl;
-	cout << "Ошибка: " << msg << endl << "	";
-	token.PrintToken();
-	cout << "====================" << endl;
+	cout << "bad token \"" << token.source << "\" at (" << token.token_pos.y << ":" << token.token_pos.x << "): " << msg << endl;
 	return 0;
 }
 
@@ -324,7 +323,7 @@ Token Scanner::Next(){
 					break;
 				}
 				AddSymbol(token, cur_symbol);
-				ErrorHandler(token, "Обнаружен неизвестный символ");
+				ErrorHandler(token, "unknown symbol");
 				cur_symbol = fin.get();
 				break;
 		}		
@@ -333,7 +332,7 @@ Token Scanner::Next(){
 }
 
 Token Scanner::GetNumber(char c){
-	Token num_token(c, c, cur_pos, _NUMBER);
+	Token num_token(c, c, cur_pos, _INTEGER);
 	int cnt_dot = 0;
 	while(true){
 		cur_symbol = fin.get();
@@ -345,11 +344,9 @@ Token Scanner::GetNumber(char c){
 			string num = num_token.value;
 			string num_source = num_token.source;
 			AddSymbol(num_token, cur_symbol);
-			if (cnt_dot > 1)
-				ErrorHandler(num_token, "Обнаружена лишняя точка");
 			cur_symbol = fin.get();
 			if (cur_symbol == '.'){
-				Token n_token(num, num_source, num_token.token_pos, _NUMBER);
+				Token n_token(num, num_source, num_token.token_pos, _INTEGER);
 				dTokens.push_back(n_token);
 				ChangePos(0, n_token.source.length());
 				Token double_dot("..", "..", cur_pos, _SEPARATOR);
@@ -364,6 +361,8 @@ Token Scanner::GetNumber(char c){
 		else 
 			break;
 	}
+	if (cnt_dot >= 1) num_token.type = _FLOAT;
+	if (cnt_dot > 1) ErrorHandler(num_token, "invalid float");
 	ChangePos(0, num_token.source.length() - 1);
 	return num_token;
 }
@@ -371,7 +370,7 @@ Token Scanner::GetNumber(char c){
 Token Scanner::GetIdent(char c){
 	Token ident_token(c, c, cur_pos, _IDENT);
 	int cnt = 1;
-	while(cnt <= max_length_ident){
+	while(true && cur_symbol != EOF){
 		cnt++;
 		cur_symbol = fin.get();
 		if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || 
@@ -381,8 +380,7 @@ Token Scanner::GetIdent(char c){
 		else
 			break;
 	}
-	if (cnt > max_length_ident)
-		ErrorHandler(ident_token, "Превышена максимальная длина идентификатора");
+	if (cnt > max_length_ident) ErrorHandler(ident_token, "excess max length");
 	ChangePos(0, ident_token.value.length() - 1);
 	return ident_token;
 }
@@ -392,7 +390,7 @@ Token Scanner::GetLiteral(char c){
 	Token literal_token(0, c, cur_pos, _LITERAL);
 	int len_symbol = 0;
 	int cnt = 1;
-	while(cnt <= max_length_literal){
+	while(true && cur_symbol != EOF){
 		cnt++;
 		cur_symbol = fin.get();
 		if (((c == '\'') && (cur_symbol != '\'')) || ((c == '"') && (cur_symbol != '"')))
@@ -422,7 +420,6 @@ Token Scanner::GetLiteral(char c){
 					else{
 						error = true;
 						literal_token.source += cur_symbol;
-						ErrorHandler(literal_token, "Ошибка в оформлении литерала");
 						cur_symbol = fin.get();
 					}
 				}
@@ -438,8 +435,9 @@ Token Scanner::GetLiteral(char c){
 		}
 	}
 	literal_token.source += c;
+	if (error) ErrorHandler(literal_token, "invalid string literal");
 	if (cnt > max_length_literal)
-		ErrorHandler(literal_token, "Первышена максимальная длина литерала");
+		ErrorHandler(literal_token, "excess max length");
 	ChangePos(0, literal_token.value.length() + len_symbol);
 	return literal_token;
 }
