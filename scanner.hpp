@@ -36,6 +36,7 @@ public:
 	Token GetNumber(char c);
 	Token GetIdent(char c);
 	Token GetBinaryNumber();
+	Token GetHexNumber();
 	int GetLengthDeque();
 	Token GetToken(int index);
 	int ErrorHandler(Token token, std::string msg);

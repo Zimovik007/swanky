@@ -313,6 +313,10 @@ Token Scanner::Next(){
 					token = GetBinaryNumber();
 					break;
 				}
+				if (cur_symbol == '$'){
+					token = GetHexNumber();
+					break;
+				}
 				if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || ((cur_symbol >= 'A') && (cur_symbol <= 'Z')) || (cur_symbol == '_')){
 					token = GetIdent(cur_symbol);
 					string check_rw = token.value;
@@ -335,10 +339,7 @@ Token Scanner::Next(){
 }
 
 Token Scanner::GetBinaryNumber(){
-	Token token;
-	token.source = '%';
-	token.type = _INTEGER;
-	token.token_pos = cur_pos;
+	Token token(0, cur_symbol, cur_pos, _INTEGER);
 	cur_symbol = fin.get();
 	bool error = false;
 	while (cur_symbol >= '0' && cur_symbol <= '9' && cur_symbol != EOF){
@@ -347,9 +348,37 @@ Token Scanner::GetBinaryNumber(){
 		ChangePos(0, 1);
 		cur_symbol = fin.get();
 	}
-	if (token.source.length() > 32) ErrorHandler(token, "excess max length of binary number");
+	if (token.source.length() > 32) ErrorHandler(token, "integer overflow");
 	else if (error || token.source.length() == 1) ErrorHandler(token, "invalid binary number");
 	else token.value = to_string(stoi(token.value, 0, 2));
+	return token;
+}
+
+Token Scanner::GetHexNumber(){
+	Token token(0, cur_symbol, cur_pos, _INTEGER);
+	cur_symbol = fin.get();
+	bool error = false;
+	while (((cur_symbol >= '0' && cur_symbol <= '9') || 
+		(cur_symbol >= 'a' && cur_symbol <= 'z') ||
+		(cur_symbol >= 'A' && cur_symbol <= 'Z')) &&
+		cur_symbol != EOF){
+			if ((cur_symbol > 'f' && cur_symbol <= 'z') ||
+				(cur_symbol > 'F' && cur_symbol <= 'Z'))
+					error = true;
+			AddSymbol(token, cur_symbol);
+			ChangePos(0, 1);
+			cur_symbol = fin.get();
+	}
+	if (error) ErrorHandler(token, "invalid hex number");
+	else{
+		try{
+			token.value = to_string(stoi(token.value, 0, 16));
+		}
+		catch(out_of_range exep){
+			token.value = "";
+			ErrorHandler(token, "integer overflow");
+		}
+	} 
 	return token;
 }
 
