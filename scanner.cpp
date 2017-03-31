@@ -184,7 +184,6 @@ Scanner::Scanner(string text){
 	cur_pos.y = 1;
 	cur_pos.x = 0;
 	max_length_ident = 16;
-	max_length_literal = 256;
 	cur_symbol = fin.get();
 	while(cur_symbol != EOF)
 		dTokens.push_back(Next());
@@ -299,7 +298,7 @@ Token Scanner::Next(){
 			
 			case '.': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
-					case '.': ChangePos(0, 1); token = InitSimpleToken(token, cur_symbol, _SEPARATOR); cur_symbol = fin.get(); break;
+					case '.': ChangePos(0, 1); token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); break;
 				}
 				break;
 
@@ -310,7 +309,11 @@ Token Scanner::Next(){
 				break;
 
 			default: 
-				if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || ((cur_symbol >= 'A') && (cur_symbol <= 'Z'))){
+				if (cur_symbol == '%'){
+					token = GetBinaryNumber();
+					break;
+				}
+				if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || ((cur_symbol >= 'A') && (cur_symbol <= 'Z')) || (cur_symbol == '_')){
 					token = GetIdent(cur_symbol);
 					string check_rw = token.value;
 					transform(check_rw.begin(), check_rw.end(), check_rw.begin(), ::toupper);
@@ -328,6 +331,25 @@ Token Scanner::Next(){
 				break;
 		}		
 	}	
+	return token;
+}
+
+Token Scanner::GetBinaryNumber(){
+	Token token;
+	token.source = '%';
+	token.type = _INTEGER;
+	token.token_pos = cur_pos;
+	cur_symbol = fin.get();
+	bool error = false;
+	while (cur_symbol >= '0' && cur_symbol <= '9' && cur_symbol != EOF){
+		if (cur_symbol >= '2') error = true;
+		AddSymbol(token, cur_symbol);
+		ChangePos(0, 1);
+		cur_symbol = fin.get();
+	}
+	if (token.source.length() > 32) ErrorHandler(token, "excess max length of binary number");
+	else if (error || token.source.length() == 1) ErrorHandler(token, "invalid binary number");
+	else token.value = to_string(stoi(token.value, 0, 2));
 	return token;
 }
 
@@ -349,7 +371,7 @@ Token Scanner::GetNumber(char c){
 				Token n_token(num, num_source, num_token.token_pos, _INTEGER);
 				dTokens.push_back(n_token);
 				ChangePos(0, n_token.source.length());
-				Token double_dot("..", "..", cur_pos, _SEPARATOR);
+				Token double_dot("..", "..", cur_pos, _OPERATOR);
 				cur_symbol = fin.get();
 				ChangePos(0, 1);
 				return double_dot;
@@ -375,12 +397,13 @@ Token Scanner::GetIdent(char c){
 		cur_symbol = fin.get();
 		if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || 
 			((cur_symbol >= 'A') && (cur_symbol <= 'Z')) ||
-			((cur_symbol >= '0') && (cur_symbol <= '9')))
+			((cur_symbol >= '0') && (cur_symbol <= '9')) ||
+			(cur_symbol == '_'))
 				AddSymbol(ident_token, cur_symbol);
 		else
 			break;
 	}
-	if (cnt > max_length_ident) ErrorHandler(ident_token, "excess max length");
+	if (cnt > max_length_ident) ErrorHandler(ident_token, "excess max length of indentifier");
 	ChangePos(0, ident_token.value.length() - 1);
 	return ident_token;
 }
@@ -398,7 +421,7 @@ Token Scanner::GetLiteral(char c){
 		else{
 			char _c = cur_symbol;
 			cur_symbol = fin.get();
-			if ((_c == c) && (c == '"')) break;
+			if ((_c == '"') && (c == '"')) break;
 			if (cur_symbol == '\''){
 				literal_token.source += cur_symbol;
 				AddSymbol(literal_token, cur_symbol);
@@ -436,8 +459,6 @@ Token Scanner::GetLiteral(char c){
 	}
 	literal_token.source += c;
 	if (error) ErrorHandler(literal_token, "invalid string literal");
-	if (cnt > max_length_literal)
-		ErrorHandler(literal_token, "excess max length");
 	ChangePos(0, literal_token.value.length() + len_symbol);
 	return literal_token;
 }

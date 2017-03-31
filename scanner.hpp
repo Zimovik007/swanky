@@ -35,6 +35,7 @@ public:
 	Token GetLiteral(char c);
 	Token GetNumber(char c);
 	Token GetIdent(char c);
+	Token GetBinaryNumber();
 	int GetLengthDeque();
 	Token GetToken(int index);
 	int ErrorHandler(Token token, std::string msg);
@@ -42,7 +43,6 @@ public:
 	int GetCntErrors();
 private:
 	std::deque<Token> dTokens;
-	int max_length_literal;
 	int max_length_ident;
 	std::fstream fin;
 	char cur_symbol;
