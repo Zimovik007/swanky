@@ -5,57 +5,13 @@
 using namespace std;
 
 enum reserved_words{
-	_AND,
-	_ASM,
-	_ARRAY,
-	_BEGIN,
-	_CASE,
-	_CONST,
-	_CONSTRUCTOR,
-	_DESTRUCTOR,
-	_DIV,
-	_DO,
-	_DOWNTO,
-	_ELSE,
-	_END,
-	_EXPORTS,
-	_FILE,
-	_FOR,
-	_FUNCTION,
-	_GOTO,
-	_IF,
-	_IMPLEMENTATION,
-	_IN,
-	_INHERITED,
-	_INLINE,
-	_INTERFACE,
-	_LABEL,
-	_LIBRARY,
-	_MOD,
-	_NIL,
-	_NOT,
-	_OBJECT,
-	_OF,
-	_OR,
-	_PACKED,
-	_PROCEDURE,
-	_PROGRAM,
-	_RECORD,
-	_REPEAT,
-	_SET,
-	_SHL,
-	_SHR,
-	_STRING,
-	_THEN,
-	_TO,
-	_TYPE,
-	_UNIT,
-	_UNTIL,
-	_USES,
-	_VAR,
-	_WHILE,
-	_WITH,
-	_XOR
+	_AND, _ASM, _ARRAY,	_BEGIN,	_CASE, _CONST, _CONSTRUCTOR,
+	_DESTRUCTOR, _DIV, _DO,	_DOWNTO, _ELSE,	_END, _EXPORTS,
+	_FILE, _FOR, _FUNCTION,	_GOTO, _IF, _IMPLEMENTATION,
+	_IN, _INHERITED, _INLINE, _INTERFACE, _LABEL, _LIBRARY,
+	_MOD, _NIL, _NOT, _OBJECT, _OF, _OR, _PACKED, _PROCEDURE,
+	_PROGRAM, _RECORD, _REPEAT, _SET, _SHL, _SHR, _STRING,
+	_THEN, _TO, _TYPE, _UNIT, _UNTIL, _USES, _VAR, _WHILE, _WITH, _XOR
 };
 
 map<string, int> rw = {
@@ -245,25 +201,21 @@ Token Scanner::Next(){
 			case ';': token = InitSimpleToken(token, cur_symbol, _SEPARATOR); cur_symbol = fin.get(); break;
 			case '"': token = GetLiteral(cur_symbol); token.type = _LITERAL; break;
 			case '\'': token = GetLiteral(cur_symbol); token.type = _LITERAL; break;
-
 			case '+': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
-
 			case '-': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
-
 			case '*': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
-
 			case '/': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
@@ -273,20 +225,17 @@ Token Scanner::Next(){
 						break;
 				}
 				break;
-
 			case '<': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 					case '>': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
-
 			case '>': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					case '=': ChangePos(0, 1); AddSymbol(token, cur_symbol); cur_symbol = fin.get(); break;
 				}
 				break;
-
 			case '{': 
 				while((cur_symbol != '}') && (cur_symbol != EOF)){
 					cur_symbol = fin.get();
@@ -294,20 +243,17 @@ Token Scanner::Next(){
 					else  ChangePos(1, 0);
 				} 
 				cur_symbol = fin.get(); 
-				break;
-			
+				break;			
 			case '.': token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); 
 				switch(cur_symbol){
 					case '.': ChangePos(0, 1); token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); break;
 				}
 				break;
-
 			case ':': token = InitSimpleToken(token, cur_symbol, _SEPARATOR); cur_symbol = fin.get();
 				switch(cur_symbol){
 					case '=': ChangePos(0, 1); token = InitSimpleToken(token, cur_symbol, _OPERATOR); cur_symbol = fin.get(); break;
 				}
 				break;
-
 			default: 
 				if (cur_symbol == '%'){
 					token = GetBinaryNumber();
@@ -385,10 +331,26 @@ Token Scanner::GetHexNumber(){
 Token Scanner::GetNumber(char c){
 	Token num_token(c, c, cur_pos, _INTEGER);
 	int cnt_dot = 0;
+	bool e = false;
 	while(true){
 		cur_symbol = fin.get();
 		if ((cur_symbol >= '0') && (cur_symbol <= '9'))
 			AddSymbol(num_token, cur_symbol);
+		else
+		if (cur_symbol == 'e'){ 
+			e = true;
+			AddSymbol(num_token, cur_symbol);
+			cur_symbol = fin.get();
+			if (cur_symbol == '-' || cur_symbol == '+'){
+				AddSymbol(num_token, cur_symbol);
+				cur_symbol = fin.get();
+			}
+			while((cur_symbol >= '0') && (cur_symbol <= '9')){
+				AddSymbol(num_token, cur_symbol);
+				cur_symbol = fin.get();
+			}
+			break;
+		}
 		else
 		if (cur_symbol == '.'){
 			cnt_dot++;
@@ -408,12 +370,32 @@ Token Scanner::GetNumber(char c){
 			else
 			if ((cur_symbol >= '0') && (cur_symbol <= '9'))
 				AddSymbol(num_token, cur_symbol);
+			else		
+				if (cur_symbol == 'e'){
+					e = true;
+					AddSymbol(num_token, cur_symbol);
+					cur_symbol = fin.get();
+					if (cur_symbol == '-' || cur_symbol == '+'){
+						AddSymbol(num_token, cur_symbol);
+						cur_symbol = fin.get();
+					}
+					while((cur_symbol >= '0') && (cur_symbol <= '9')){
+						AddSymbol(num_token, cur_symbol);
+						cur_symbol = fin.get();
+					}
+					break;
+				}
+			else
+				break;
 		}
 		else 
 			break;
 	}
 	if (cnt_dot >= 1) num_token.type = _FLOAT;
 	if (cnt_dot > 1) ErrorHandler(num_token, "invalid float");
+	if (e){
+		num_token.value = to_string(stof(num_token.value));
+	}
 	ChangePos(0, num_token.source.length() - 1);
 	return num_token;
 }
