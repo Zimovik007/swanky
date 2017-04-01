@@ -1,0 +1,14 @@
+(1, 1)    integer literal   1  ~1~
+(2, 1)    integer literal   12  ~12~
+(3, 1)    integer literal   12345  ~12345~
+(4, 1)    float literal     123.0  ~123.0~
+(5, 1)    float literal     123.  ~123.~
+(6, 1)    float literal     123123.54423  ~123123.54423~
+(7, 1)    integer literal   0.000010  ~1e-5~
+(8, 1)    float literal     0.000015  ~1.5e-5~
+(9, 1)    integer literal   100000.000000  ~1e+5~
+(10, 1)   integer literal   200000.000000  ~2e5~
+(11, 1)   integer literal   0.000000  ~10e-10~
+(12, 1)   integer literal   350  ~%101011110~
+(13, 1)   integer literal   16777215  ~$ffffff~
+(14, 1)   float literal     123123123112.090909099090  ~123123123112.090909099090~

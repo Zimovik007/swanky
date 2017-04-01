@@ -1,0 +1,7 @@
+(1, 1)    identifier        cnt  ~cnt~
+(2, 1)    identifier        _cnt  ~_cnt~
+(3, 1)    identifier        __cnt__  ~__cnt__~
+(4, 1)    identifier        CNT  ~CNT~
+(5, 1)    identifier        Cnt  ~Cnt~
+(6, 1)    identifier        _____12345_____  ~_____12345_____~
+(7, 1)    identifier        _1_2_3_4_5_  ~_1_2_3_4_5_~
