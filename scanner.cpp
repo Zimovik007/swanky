@@ -287,11 +287,14 @@ Token Scanner::GetBinaryNumber(){
 	Token token(0, cur_symbol, cur_pos, _INTEGER);
 	cur_symbol = fin.get();
 	bool error = false;
-	while (cur_symbol >= '0' && cur_symbol <= '9' && cur_symbol != EOF){
-		if (cur_symbol >= '2') error = true;
-		AddSymbol(token, cur_symbol);
-		ChangePos(0, 1);
-		cur_symbol = fin.get();
+	while (((cur_symbol >= '0' && cur_symbol <= '9') || 
+		(cur_symbol >= 'a' && cur_symbol <= 'z') ||
+		(cur_symbol >= 'A' && cur_symbol <= 'Z')) &&
+		cur_symbol != EOF){
+			if (cur_symbol >= '2') error = true;
+			AddSymbol(token, cur_symbol);
+			ChangePos(0, 1);
+			cur_symbol = fin.get();
 	}
 	if (token.source.length() > 32) ErrorHandler(token, "integer overflow");
 	else if (error || token.source.length() == 1) ErrorHandler(token, "invalid binary number");
