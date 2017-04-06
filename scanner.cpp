@@ -68,26 +68,6 @@ map<string, int> rw = {
 	{"XOR", _XOR}
 };
 
-enum types{
-	_OPERATOR,
-	_LITERAL,
-	_INTEGER,
-	_FLOAT,
-	_IDENT,
-	_SEPARATOR,
-	_RESERVED_WORD,
-};
-
-map<int, string> tp = {
-	{_OPERATOR, "operator"},
-	{_LITERAL, "string literal"},
-	{_INTEGER, "integer literal"},
-	{_FLOAT, "float literal"},
-	{_IDENT, "identifier"},
-	{_SEPARATOR, "separator"},
-	{_RESERVED_WORD, "reserved"},
-};
-
 Token InitSimpleToken(Token token, char symbol, int type = -1){
 	token.value += symbol;
 	token.source = token.value;
@@ -99,39 +79,6 @@ Token InitSimpleToken(Token token, char symbol, int type = -1){
 void AddSymbol(Token& token, char c){
 	token.value += c;
 	token.source += c;
-}
-
-Token::Token(){
-	value = "";
-}
-
-Token::Token(string _value, string _source, pos _token_pos, int _type){
-	value = _value;
-	source = _source;
-	token_pos = _token_pos;
-	type = _type;
-}
-
-Token::Token(char _value, char _source, pos _token_pos, int _type){
-	if (_value)
-		value += _value;
-	source += _source;
-	token_pos = _token_pos;
-	type = _type;
-}
-
-int Token::PrintToken(){
-	int offset_pos = 5 + to_string(token_pos.y).length() + to_string(token_pos.x).length();
-	cout << "(" << token_pos.y << ", " << token_pos.x << ") ";
-	for (int i = 0; i < 10 - offset_pos; i++){
-		cout << " ";
-	}
-	cout << tp[type] << " ";
-	for (int i = 0; i < 17 - tp[type].length(); i++){
-		cout << " ";
-	}
-	cout << value << "  ~" << source << "~" << endl; 
-	return 0;
 }
 
 Scanner::Scanner(string text){
@@ -177,10 +124,6 @@ int Scanner::ChangePos(int change_y, int change_x){
 	else
 		cur_pos.x += change_x;
 	return 0;
-}
-
-pos Scanner::GetPos(){
-	return cur_pos;
 }
 
 Token Scanner::Next(){
@@ -279,7 +222,11 @@ Token Scanner::Next(){
 				cur_symbol = fin.get();
 				break;
 		}		
-	}	
+	}
+	if (cur_symbol == EOF){
+		Token eof("EOF", "EOF", cur_pos, _EOF);
+		token = eof;
+	}
 	return token;
 }
 

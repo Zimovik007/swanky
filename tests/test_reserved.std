@@ -49,3 +49,4 @@
 (49, 1)   reserved          WHILE  ~WHILE~
 (50, 1)   reserved          WITH  ~WITH~
 (51, 1)   reserved          XOR  ~XOR~
+(52, 0)   [end of file]     EOF  ~EOF~

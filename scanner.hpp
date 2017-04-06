@@ -3,34 +3,12 @@
 #include <fstream>
 #include <map>
 #include <deque>
-
-typedef struct Position{
-	int x, y;
-} pos;
-
-class Token{
-public:
-	Token();
-	Token(std::string _value, std::string _source, pos _token_pos, int _type);
-	Token(char _value, char _source, pos _token_pos, int _type);
-	Token& operator=(const Token& right){
-		value = right.value;
-		token_pos = right.token_pos;
-		type = right.type;
-		source = right.source;
-	}
-	int PrintToken();
-	pos token_pos;
-	std::string value;
-	std::string source;
-	int type;
-};
+#include "token.hpp"
 
 class Scanner{
 public:
 	Scanner(std::string text);
 	int ChangePos(int change_y, int change_x);
-	pos GetPos();
 	Token Next();
 	Token GetLiteral(char c);
 	Token GetNumber(char c);
