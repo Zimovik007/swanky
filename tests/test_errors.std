@@ -6,3 +6,4 @@ bad token "identifier1234567" at (5:1): excess max length of indentifier
 bad token "'string and ascii symbol'#32c''" at (6:1): invalid string literal
 bad token "10.025.12" at (7:1): invalid float
 bad token "999999999999999" at (8:1): integer overflow
+bad token "1e-" at (1:1): wrong exponent number
