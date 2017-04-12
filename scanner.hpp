@@ -2,7 +2,7 @@
 #include <string>
 #include <fstream>
 #include <map>
-#include <deque>
+#include <vector>
 #include "token.hpp"
 
 class Scanner{
@@ -25,7 +25,7 @@ private:
 	int HandleError(Token token, std::string msg);
 	void AddSymbol(Token& token, char c);
 	void SetToken(Token& token, char symbol, int type);
-	std::deque<Token> dTokens;
+	std::vector<Token> dTokens;
 	int max_length_ident;
 	std::fstream fin;
 	char cur_symbol;
