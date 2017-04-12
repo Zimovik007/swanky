@@ -104,7 +104,7 @@ int Scanner::AddError(){
 
 int Scanner::HandleError(Token token, string msg){
 	AddError();
-	cout << "bad token \"" << token.source << "\" at (" << token.token_pos.y << ":" << token.token_pos.x << "): " << msg << endl;
+	cout << "(" << token.token_pos.y << ":" << token.token_pos.x << ") " << "bad token \"" << token.source << "\": " << msg << endl;
 	return 0;
 }
 
@@ -378,18 +378,25 @@ Token Scanner::GetLiteral(char c){
 				string ascii_symbol = "";
 				cur_symbol = fin.get();
 				while (cur_symbol != '\''){
+					literal_token.source += cur_symbol;
 					if ((cur_symbol >= '0') && (cur_symbol <= '9'))	
 						ascii_symbol += cur_symbol;
-					else
+					else{
 						error = true;
-					literal_token.source += cur_symbol;
+						cur_symbol = fin.get();
+						break;
+					}
 					cur_symbol = fin.get();
 				}
 				if (!error) literal_token.value += stoi(ascii_symbol);
+				else
+					break;
+				literal_token.source += cur_symbol;
+				cur_symbol = fin.get();
 			}
 			else
 				break;
-		}
+		}	
 	}
 	if (error) HandleError(literal_token, "invalid string literal");
 	ChangePos(0, literal_token.source.length());

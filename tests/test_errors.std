@@ -1,9 +1,9 @@
-bad token "%11100101f" at (1:1): invalid binary number
-bad token "%1111111111111111111111111111111111111111111" at (2:1): integer overflow
-bad token "$fffacds" at (3:1): invalid hex number
-bad token "$fffffffffffffffffffffffff" at (4:1): integer overflow
-bad token "identifier1234567" at (5:1): excess max length of indentifier
-bad token "'string and ascii symbol'#32c''" at (6:1): invalid string literal
-bad token "10.025.12" at (7:1): invalid float
-bad token "999999999999999" at (8:1): integer overflow
-bad token "1e-" at (1:1): wrong exponent number
+(1:1) bad token "%11100101f": invalid binary number
+(2:1) bad token "%1111111111111111111111111111111111111111111": integer overflow
+(3:1) bad token "$fffacds": invalid hex number
+(4:1) bad token "$fffffffffffffffffffffffff": integer overflow
+(5:1) bad token "identifier1234567890______identifier1234567890______identifier1234567890______identifier1234567890______identifier1234567890______identifier1234567890______identifier1234567890______identifier1234567890______identifier1234567890______identifier1234567890______": excess max length of indentifier
+(6:1) bad token "'string and ascii symbol'#32c": invalid string literal
+(7:1) bad token "10.025.12": invalid float
+(8:1) bad token "999999999999999": integer overflow
+(9:1) bad token "1e-": wrong exponent number
