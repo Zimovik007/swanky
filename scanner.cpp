@@ -200,6 +200,12 @@ Token Scanner::Next(){
 			case '.': SetToken(token, cur_symbol, _OPERATOR); 
 				switch(cur_symbol){
 					case '.': ChangePos(0, 1); SetToken(token, cur_symbol, _OPERATOR); break;
+					default: 
+						if (cur_symbol <= '9' && cur_symbol >= '0'){
+							token = GetNumber(cur_symbol, 1);
+							token.value = "0." + token.value;
+							token.source = "." + token.source;
+						}
 				}
 				break;
 			case ':': SetToken(token, cur_symbol, _SEPARATOR);
@@ -225,7 +231,7 @@ Token Scanner::Next(){
 					break; 
 				}	
 				else if ((cur_symbol >= '0') && (cur_symbol <= '9')){
-					token = GetNumber(cur_symbol);
+					token = GetNumber(cur_symbol, 0);
 					break;
 				}
 				AddSymbol(token, cur_symbol);
@@ -274,10 +280,10 @@ Token Scanner::GetHexNumber(){
 	return token;
 }
 
-Token Scanner::GetNumber(char c){
+Token Scanner::GetNumber(char c, int cnt_dots){
 	Token num_token(c, c, cur_pos, _INTEGER);
 	string num, num_source;
-	int cnt_dot = 0;
+	int cnt_dot = cnt_dots;
 	bool e = false;
 	bool error = false;
 	cur_symbol = fin.get();
