@@ -14,6 +14,7 @@ public:
 	int GetCntErrors();
 private:
 	int ChangePos(int change_y, int change_x);
+	void GetASCIICharacter(Token& token, bool& error);
 	Token GetLiteral(char c);
 	Token GetNumber(char c);
 	Token GetIdent(char c);

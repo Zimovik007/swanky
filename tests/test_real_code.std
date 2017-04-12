@@ -48,4 +48,3 @@
 (6, 15)   separator         ;  ~;~
 (7, 1)    reserved          end  ~end~
 (7, 4)    operator          .  ~.~
-(8, 0)    [end of file]     EOF  ~EOF~

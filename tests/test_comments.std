@@ -2,4 +2,3 @@
 (4, 1)    identifier        test2  ~test2~
 (8, 1)    reserved          end  ~end~
 (8, 4)    operator          .  ~.~
-(9, 0)    [end of file]     EOF  ~EOF~

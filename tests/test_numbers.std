@@ -12,4 +12,3 @@
 (12, 1)   integer literal   350  ~%101011110~
 (13, 1)   integer literal   16777215  ~$ffffff~
 (14, 1)   float literal     123123123112.090909099090  ~123123123112.090909099090~
-(15, 0)   [end of file]     EOF  ~EOF~

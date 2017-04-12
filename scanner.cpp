@@ -373,44 +373,50 @@ Token Scanner::GetLiteral(char c){
 	Token literal_token(0, c, cur_pos, _LITERAL);
 	int cnt = 1;
 	cur_symbol = fin.get();
-	while(cur_symbol != EOF){
-		cnt++;
-		if (cur_symbol != '\'')
-			AddSymbol(literal_token, cur_symbol);
-		else{
-			literal_token.source += cur_symbol;
-			cur_symbol = fin.get();
-			if (cur_symbol == '\'')
+	if (cur_symbol == '#')
+		GetASCIICharacter(literal_token, error);
+	else
+		while(cur_symbol != EOF){
+			cnt++;
+			if (cur_symbol != '\'')
 				AddSymbol(literal_token, cur_symbol);
-			else
-			if (cur_symbol == '#'){
-				while (cur_symbol == '#'){
-					literal_token.source += cur_symbol;
-					string ascii_symbol = "";
-					cur_symbol = fin.get();
-					while (cur_symbol != '\'' && cur_symbol != '#'){
-						literal_token.source += cur_symbol;
-						if ((cur_symbol >= '0') && (cur_symbol <= '9'))	
-							ascii_symbol += cur_symbol;
-						else{
-							error = true;
-							cur_symbol = fin.get();
-							break;
-						}
-						cur_symbol = fin.get();
-					}
-					if (!error) literal_token.value += stoi(ascii_symbol);
-					else
-						break;
-				}
+			else{
 				literal_token.source += cur_symbol;
 				cur_symbol = fin.get();
-			}
-			else
-				break;
-		}	
-	}
+				if (cur_symbol == '\'')
+					AddSymbol(literal_token, cur_symbol);
+				else
+				if (cur_symbol == '#')
+					GetASCIICharacter(literal_token, error);
+				else
+					break;
+			}	
+		}
 	if (error) HandleError(literal_token, "invalid string literal");
 	ChangePos(0, literal_token.source.length());
 	return literal_token;
+}
+
+void Scanner::GetASCIICharacter(Token& token, bool& error){
+	while (cur_symbol == '#'){
+		token.source += cur_symbol;
+		string ascii_symbol = "";
+		cur_symbol = fin.get();
+		while (cur_symbol != '\'' && cur_symbol != '#'){
+			token.source += cur_symbol;
+			if ((cur_symbol >= '0') && (cur_symbol <= '9'))	
+				ascii_symbol += cur_symbol;
+			else{
+				error = true;
+				cur_symbol = fin.get();
+				break;
+			}
+			cur_symbol = fin.get();
+		}
+		if (!error) token.value += stoi(ascii_symbol);
+		else
+			break;
+	}
+	token.source += cur_symbol;
+	cur_symbol = fin.get();
 }
