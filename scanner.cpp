@@ -89,8 +89,11 @@ Scanner::Scanner(string text){
 	cur_pos.x = 0;
 	max_length_ident = 256;
 	cur_symbol = fin.get();
-	while(cur_symbol != EOF)
-		dTokens.push_back(Next());
+	Token token_next;
+	while(token_next.type != _EOF){
+		token_next = Next();
+		dTokens.push_back(token_next);
+	}
 }
 
 int Scanner::GetCntErrors(){
