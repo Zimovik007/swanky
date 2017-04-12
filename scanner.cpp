@@ -290,19 +290,7 @@ Token Scanner::GetNumber(char c, int cnt_dots){
 	while(true){
 		if ((cur_symbol >= '0') && (cur_symbol <= '9'))
 			AddSymbol(num_token, cur_symbol);
-		else
-		if (cur_symbol == 'e'){ 
-			e = true;
-			error = true;
-			AddSymbol(num_token, cur_symbol);
-			if (cur_symbol == '-' || cur_symbol == '+')
-				AddSymbol(num_token, cur_symbol);
-			while((cur_symbol >= '0') && (cur_symbol <= '9')){
-				error = false;
-				AddSymbol(num_token, cur_symbol);
-			}
-			break;
-		}
+		else if (GetExp(num_token, error, e)) break;
 		else
 		if (cur_symbol == '.'){
 			cnt_dot++;
@@ -321,21 +309,8 @@ Token Scanner::GetNumber(char c, int cnt_dots){
 			else
 			if ((cur_symbol >= '0') && (cur_symbol <= '9'))
 				AddSymbol(num_token, cur_symbol);
-			else		
-				if (cur_symbol == 'e'){
-					e = true;
-					error = true;
-					AddSymbol(num_token, cur_symbol);
-					if (cur_symbol == '-' || cur_symbol == '+')
-						AddSymbol(num_token, cur_symbol);
-					while((cur_symbol >= '0') && (cur_symbol <= '9')){
-						error = false;
-						AddSymbol(num_token, cur_symbol);
-					}
-					break;
-				}
-			else
-				break;
+			else if (GetExp(num_token, error, e)) break;		
+			else break;
 		}
 		else 
 			break;
@@ -356,6 +331,22 @@ Token Scanner::GetNumber(char c, int cnt_dots){
 	catch(out_of_range Exep){ HandleError(num_token, "integer overflow"); }
 	ChangePos(0, num_token.source.length() - 1);
 	return num_token;
+}
+
+bool Scanner::GetExp(Token& token, bool& error, bool& e){
+	if (cur_symbol == 'e'){
+		e = true;
+		error = true;
+		AddSymbol(token, cur_symbol);
+		if (cur_symbol == '-' || cur_symbol == '+')
+			AddSymbol(token, cur_symbol);
+		while((cur_symbol >= '0') && (cur_symbol <= '9')){
+			error = false;
+			AddSymbol(token, cur_symbol);
+		}
+		return true;
+	}
+	return false;
 }
 
 Token Scanner::GetIdent(char c){
