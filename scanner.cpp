@@ -190,8 +190,10 @@ Token Scanner::Next(){
 					if (cur_symbol != '\n') ChangePos(0, 1);
 					else  ChangePos(1, 0);
 				}
-				if (cur_symbol == EOF)
-					HandleError(token, "comment not closed");
+				if (cur_symbol == EOF){
+					Token error_comment("{", "{", cur_pos, _SEPARATOR);
+					HandleError(error_comment, "comment not closed");
+				}
 				else
 					cur_symbol = fin.get(); 
 				break;			
@@ -332,10 +334,18 @@ Token Scanner::GetNumber(char c){
 		else 
 			break;
 	}
-	if (cnt_dot >= 1) num_token.type = _FLOAT;
+	try{
+		if (cnt_dot >= 1 || e){
+			num_token.type = _FLOAT;
+			string check_float_overflow = to_string(stof(num_token.value));
+			if (e) num_token.value = check_float_overflow;	
+			if (num_token.value[num_token.value.length() - 1] == '.')
+				num_token.value += '0';
+		}
+	}
+	catch(out_of_range Exep){ HandleError(num_token, "float overflow"); }	
 	if (cnt_dot > 1) HandleError(num_token, "invalid float");
 	if (error) HandleError(num_token, "wrong exponent number");
-	if (e) num_token.value = to_string(stof(num_token.value));
 	try{ if (num_token.type == _INTEGER) int check_int_overflow = stoi(num_token.value); }
 	catch(out_of_range Exep){ HandleError(num_token, "integer overflow"); }
 	ChangePos(0, num_token.source.length() - 1);
@@ -374,23 +384,25 @@ Token Scanner::GetLiteral(char c){
 				AddSymbol(literal_token, cur_symbol);
 			else
 			if (cur_symbol == '#'){
-				literal_token.source += cur_symbol;
-				string ascii_symbol = "";
-				cur_symbol = fin.get();
-				while (cur_symbol != '\''){
+				while (cur_symbol == '#'){
 					literal_token.source += cur_symbol;
-					if ((cur_symbol >= '0') && (cur_symbol <= '9'))	
-						ascii_symbol += cur_symbol;
-					else{
-						error = true;
-						cur_symbol = fin.get();
-						break;
-					}
+					string ascii_symbol = "";
 					cur_symbol = fin.get();
+					while (cur_symbol != '\'' && cur_symbol != '#'){
+						literal_token.source += cur_symbol;
+						if ((cur_symbol >= '0') && (cur_symbol <= '9'))	
+							ascii_symbol += cur_symbol;
+						else{
+							error = true;
+							cur_symbol = fin.get();
+							break;
+						}
+						cur_symbol = fin.get();
+					}
+					if (!error) literal_token.value += stoi(ascii_symbol);
+					else
+						break;
 				}
-				if (!error) literal_token.value += stoi(ascii_symbol);
-				else
-					break;
 				literal_token.source += cur_symbol;
 				cur_symbol = fin.get();
 			}
