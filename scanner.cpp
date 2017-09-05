@@ -7,7 +7,7 @@ using namespace std;
 enum reserved_words{
 	_AND, _ASM, _ARRAY,	_BEGIN,	_CASE, _CONST, _CONSTRUCTOR,
 	_DESTRUCTOR, _DIV, _DO,	_DOWNTO, _ELSE,	_END, _EXPORTS,
-	_FILE, _FOR, _FUNCTION,	_GOTO, _IF, _IMPLEMENTATION,
+	_FILE, _FOR, _FUNCTION,	_GOTO, _IF, _IMPL,
 	_IN, _INHERITED, _INLINE, _INTERFACE, _LABEL, _LIBRARY,
 	_MOD, _NIL, _NOT, _OBJECT, _OF, _OR, _PACKED, _PROCEDURE,
 	_PROGRAM, _RECORD, _REPEAT, _SET, _SHL, _SHR, _STRING,
@@ -15,56 +15,28 @@ enum reserved_words{
 };
 
 map<string, int> rw = {
-	{"AND", _AND}, 
-	{"ASM", _ASM}, 
-	{"ARRAY", _ARRAY}, 
+	{"AND", _AND},               {"ASM", _ASM},             {"ARRAY", _ARRAY}, 
 	{"BEGIN", _BEGIN}, 
-	{"CASE", _CASE}, 
-	{"CONST", _CONST}, 
-	{"CONSTRUCTOR", _CONSTRUCTOR}, 
-	{"DESTRUCTOR", _DESTRUCTOR}, 
-	{"DIV", _DIV}, 
-	{"DO", _DO}, 
+	{"CASE", _CASE},             {"CONST", _CONST},         {"CONSTRUCTOR", _CONSTRUCTOR}, 
+	{"DESTRUCTOR", _DESTRUCTOR}, {"DIV", _DIV},             {"DO", _DO},                   
 	{"DOWNTO", _DOWNTO}, 
-	{"ELSE", _ELSE}, 
-	{"END", _END}, 
-	{"EXPORTS", _EXPORTS}, 
-	{"FILE", _FILE}, 
-	{"FOR", _FOR}, 
-	{"FUNCTION", _FUNCTION}, 
-	{"GOTO", _GOTO}, 
-	{"IF", _IF}, 
-	{"IMPLEMENTATION", _IMPLEMENTATION}, 
-	{"IN", _IN}, 
-	{"INHERITED", _INHERITED}, 
-	{"INLINE", _INLINE}, 
-	{"INTERFACE", _INTERFACE}, 
-	{"LABEL", _LABEL}, 
-	{"LIBRARY", _LIBRARY}, 
+	{"ELSE", _ELSE},             {"END", _END},             {"EXPORTS", _EXPORTS}, 
+	{"FILE", _FILE},             {"FOR", _FOR},             {"FUNCTION", _FUNCTION}, 
+	{"GOTO", _GOTO},   
+	{"IF", _IF},                 {"IMPLEMENTATION", _IMPL}, {"IN", _IN}, 
+	{"INHERITED", _INHERITED},   {"INLINE", _INLINE},       {"INTERFACE", _INTERFACE}, 
+	{"LABEL", _LABEL},           {"LIBRARY", _LIBRARY}, 
 	{"MOD", _MOD}, 
-	{"NIL", _NIL}, 
-	{"NOT", _NOT}, 
-	{"OBJECT", _OBJECT}, 
-	{"OF", _OF}, 
-	{"OR", _OR}, 
-	{"PACKED", _PACKED}, 
-	{"PROCEDURE", _PROCEDURE}, 
-	{"PROGRAM", _PROGRAM}, 
-	{"RECORD", _RECORD}, 
-	{"REPEAT", _REPEAT}, 
-	{"SET", _SET}, 
-	{"SHL", _SHL}, 
-	{"SHR", _SHR}, 
+	{"NIL", _NIL},               {"NOT", _NOT}, 
+	{"OBJECT", _OBJECT},         {"OF", _OF},               {"OR", _OR}, 
+	{"PACKED", _PACKED},         {"PROCEDURE", _PROCEDURE}, {"PROGRAM", _PROGRAM}, 
+	{"RECORD", _RECORD},         {"REPEAT", _REPEAT}, 
+	{"SET", _SET},               {"SHL", _SHL},             {"SHR", _SHR},                 
 	{"STRING", _STRING}, 
-	{"THEN", _THEN}, 
-	{"TO", _TO}, 
-	{"TYPE", _TYPE}, 
-	{"UNIT", _UNIT}, 
-	{"UNTIL", _UNTIL}, 
-	{"USES", _USES}, 
+	{"THEN", _THEN},             {"TO", _TO},               {"TYPE", _TYPE}, 
+	{"UNIT", _UNIT},             {"UNTIL", _UNTIL},         {"USES", _USES}, 
 	{"VAR", _VAR}, 
-	{"WHILE", _WHILE}, 
-	{"WITH", _WITH}, 
+	{"WHILE", _WHILE},           {"WITH", _WITH}, 
 	{"XOR", _XOR}
 };
 
@@ -85,6 +57,7 @@ void Scanner::AddSymbol(Token& token, char c){
 Scanner::Scanner(string text){
 	fin.open(text);
 	errors = 0;
+	index_token = 0;
 	cur_pos.y = 1;
 	cur_pos.x = 0;
 	max_length_ident = 256;
@@ -94,6 +67,14 @@ Scanner::Scanner(string text){
 		token_next = Next();
 		dTokens.push_back(token_next);
 	}
+}
+
+Token Scanner::GetNextToken(){
+	return dTokens[index_token++];
+}
+
+int Scanner::GetCurIndex(){
+	return index_token;
 }
 
 int Scanner::GetCntErrors(){
@@ -213,19 +194,15 @@ Token Scanner::Next(){
 				break;
 			case ':': SetToken(token, cur_symbol, _SEPARATOR);
 				switch(cur_symbol){
-					case '=': ChangePos(0, 1); SetToken(token, cur_symbol, _OPERATOR);break;
+					case '=': ChangePos(0, 1); SetToken(token, cur_symbol, _OPERATOR); break;
 				}
 				break;
 			default: 
-				if (cur_symbol == '%'){
-					token = GetBinaryNumber();
-					break;
-				}
-				if (cur_symbol == '$'){
-					token = GetHexNumber();
-					break;
-				}
-				if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || ((cur_symbol >= 'A') && (cur_symbol <= 'Z')) || (cur_symbol == '_')){
+				if (cur_symbol == '%'){ token = GetBinaryNumber(); break; }
+				if (cur_symbol == '$'){ token = GetHexNumber();    break; }
+				if (((cur_symbol >= 'a') && (cur_symbol <= 'z')) || 
+					((cur_symbol >= 'A') && (cur_symbol <= 'Z')) || 
+					 (cur_symbol == '_')){
 					token = GetIdent(cur_symbol);
 					string check_rw = token.value;
 					transform(check_rw.begin(), check_rw.end(), check_rw.begin(), ::toupper);
@@ -293,9 +270,9 @@ Token Scanner::GetNumber(char c, int cnt_dots){
 	while(true){
 		if ((cur_symbol >= '0') && (cur_symbol <= '9'))
 			AddSymbol(num_token, cur_symbol);
-		else if (GetExp(num_token, error, e)) break;
-		else
-		if (cur_symbol == '.'){
+		else if (GetExp(num_token, error, e)) 
+			break;
+		else if (cur_symbol == '.'){
 			cnt_dot++;
 			num = num_token.value;
 			num_source = num_token.source;
@@ -309,11 +286,12 @@ Token Scanner::GetNumber(char c, int cnt_dots){
 				ChangePos(0, 1);
 				return double_dot;
 			}
-			else
-			if ((cur_symbol >= '0') && (cur_symbol <= '9'))
+			else if ((cur_symbol >= '0') && (cur_symbol <= '9'))
 				AddSymbol(num_token, cur_symbol);
-			else if (GetExp(num_token, error, e)) break;		
-			else break;
+			else if (GetExp(num_token, error, e)) 
+				break;		
+			else 
+				break;
 		}
 		else 
 			break;
@@ -360,7 +338,7 @@ Token Scanner::GetIdent(char c){
 		cnt++;
 		if (CheckCharOrNum(cur_symbol) || (cur_symbol == '_'))
 			AddSymbol(ident_token, cur_symbol);
-		else
+		else 
 			break;
 	}
 	if (cnt > max_length_ident) HandleError(ident_token, "excess max length of indentifier");
@@ -385,10 +363,9 @@ Token Scanner::GetLiteral(char c){
 				cur_symbol = fin.get();
 				if (cur_symbol == '\'')
 					AddSymbol(literal_token, cur_symbol);
-				else
-				if (cur_symbol == '#')
+				else if (cur_symbol == '#')
 					GetASCIICharacter(literal_token, error);
-				else
+				else 
 					break;
 			}	
 		}
@@ -414,7 +391,7 @@ void Scanner::GetASCIICharacter(Token& token, bool& error){
 			cur_symbol = fin.get();
 		}
 		if (!error) token.value += stoi(ascii_symbol);
-		else
+		else 
 			break;
 	}
 	token.source += cur_symbol;

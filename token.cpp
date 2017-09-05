@@ -36,3 +36,6 @@ int Token::PrintToken(){
 	return 0;
 }
 
+int Token::GetType(){
+	return type;
+}

@@ -7,3 +7,5 @@
 (7:1) bad token "10.025.12": invalid float
 (8:1) bad token "999999999999999": integer overflow
 (9:1) bad token "1e-": wrong exponent number
+(10:1) bad token "1e-": wrong exponent number
+(11:20) bad token "{": comment not closed

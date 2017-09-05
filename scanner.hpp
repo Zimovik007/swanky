@@ -12,6 +12,8 @@ public:
 	int GetLengthDeque();
 	Token GetToken(int index);
 	int GetCntErrors();
+	Token GetNextToken();
+	int GetCurIndex();
 private:
 	int ChangePos(int change_y, int change_x);
 	bool GetExp(Token& token, bool& error, bool& e);
@@ -31,4 +33,5 @@ private:
 	char cur_symbol;
 	pos cur_pos;
 	int errors;
+	int index_token;
 };
