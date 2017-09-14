@@ -33,3 +33,9 @@ void CallFuncNode::PrintNode(){
 		cout << " " << func_name << "() ";
 	}
 }
+
+void ArrayNode::PrintNode(){
+	cout << name_array << "[ ";
+	index->PrintNode();
+	cout << "] ";
+}

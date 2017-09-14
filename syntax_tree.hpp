@@ -45,3 +45,12 @@ private:
 	string func_name;
 	vector<Node*> args;
 };
+
+class ArrayNode: public Node{
+public:
+	ArrayNode(string name, Node* i){name_array = name; index = i;};
+	void PrintNode();
+private:
+	string name_array;
+	Node* index;
+};

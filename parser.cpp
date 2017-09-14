@@ -15,12 +15,6 @@
 
 using namespace std;
 
-
-string paren_open = "(";
-string paren_close = ")";
-string comma = ",";
-string semicolon = ";";
-
 map<string, int> priority = {
 	{"@", 5}, 
 	{"NOT", 5}, 
@@ -43,6 +37,73 @@ map<string, int> priority = {
 	{":=", 1} 
 };
 
+Parser::Parser(Scanner* scan){
+	scanner = scan;
+	SetNextToken();
+	used_var = 0;
+	used_const = 0;
+	used_begin = 0;
+	is_end = 0;
+}
+
+void Parser::Parse(){
+	int type = cur_token.GetType(); 
+	string upper = ToUpper(cur_token.value);
+
+	if (type == T_reserved){
+		if (upper == "VAR")
+			ParseVar();
+		if (upper == "CONST")
+			ParseConst();
+		if (upper == "BEGIN"){
+			SetNextToken();
+			ParseBodyProgramm();
+		}
+		if (upper == "TYPE")
+			ParseDefinitionRecord();
+		if (upper == "FUNCTION")
+			ParseDefinitionFunction();
+	}
+	else
+		Error("Not found the beginning of the program");
+}
+
+Node* Parser::ParseVar(){
+	return 0;
+}
+
+Node* Parser::ParseConst(){
+	return 0;	
+}
+
+Node* Parser::ParseBodyProgramm(){
+	Node* tree = new Node();
+	while (scanner->GetLengthDeque() - 1 > scanner->GetCurIndex()){
+		tree = ParseExpression();
+		if (tree){
+			tree->PrintNode();
+			cout << endl;
+		}
+		if (is_end) break;
+	}
+	if (!is_end) return Error("There is no end of the program");
+	return 0;
+}
+
+Node* Parser::ParseDefinitionRecord(){
+	return 0;
+}
+
+Node* Parser::ParseDefinitionFunction(){
+	return 0;
+}
+
+string Parser::ToUpper(string str){
+	for (int i = 0; i < str.length(); i++)
+		str[i] = toupper(str[i]);
+	return str;
+}
+
 int Parser::GetPriorityToken(){
 	if (priority.find(cur_token.value)->second)
 		return priority.find(cur_token.value)->second;
@@ -59,23 +120,27 @@ void Parser::SetNextToken(){
 	cur_token = scanner->GetNextToken();
 }
 
-Parser::Parser(Scanner* scan){
-	scanner = scan;
-	SetNextToken();
-}
-
 Node* Parser::ParsePrimary(){
-	if (cur_token.value == semicolon){
+	if (cur_token.value == ";"){
 		SetNextToken();
 		return ParsePrimary();
 	}
 
 	int type = cur_token.GetType();
 
-	if (cur_token.value == paren_open) return ParseParen();
-	if (type == T_integer) 			   return ParseNumber();
-	if (type == T_float  ) 			   return ParseNumber();
-	if (type == T_ident  ) 			   return ParseIdent();
+	if (cur_token.value == "(") return ParseParen("(");
+	if (type == T_integer ) 	return ParseNumber();
+	if (type == T_float   ) 	return ParseNumber();
+	if (type == T_ident   ) 	return ParseIdent();
+	if (ToUpper(cur_token.value) == "END"){
+		SetNextToken();
+		if (cur_token.value == "."){
+			is_end = 1;
+			return 0;
+		}
+		else
+			return Error("expected '.'");
+	}
 
 	return 0;
 }
@@ -94,7 +159,6 @@ Node* Parser::ParseBinary(int exp_priority, Node* left){
 		if (cur_token_priority < exp_priority){
 			return left;
 		}
-
 		string op = cur_token.value;
 		SetNextToken();
 
@@ -121,22 +185,27 @@ Node* Parser::ParseNumber(){
 Node* Parser::ParseIdent(){
 	string name = cur_token.value;
 	SetNextToken();
-	if (cur_token.value != paren_open){
-		Node* result = new IdentNode(name);
+	if (cur_token.value != "("){
+		if (cur_token.value != "["){
+			Node* result = new IdentNode(name);
+			return result;
+		}
+		Node* index = ParseParen("[");
+		Node* result = new ArrayNode(name, index);
 		return result;
 	}
 	SetNextToken();
 	vector<Node*> args;
-	if (cur_token.value != paren_close){
+	if (cur_token.value != ")"){
 		while (true){
 			Node* argument = ParseExpression();
 			if (!argument)
 				return 0;
 			args.push_back(argument);
 
-			if (cur_token.value == paren_close)
+			if (cur_token.value == ")")
 				break;
-			if (cur_token.value != comma)
+			if (cur_token.value != ",")
 				return Error("expected ')' or ',' in arguments list");
 			SetNextToken();
 		}
@@ -146,12 +215,13 @@ Node* Parser::ParseIdent(){
 	return func;
 }
 
-Node* Parser::ParseParen(){
+Node* Parser::ParseParen(string paren){
 	SetNextToken();
 	Node* result = ParseExpression();
 
 	if (!result) return 0;
-	if (cur_token.value != paren_close) return Error("expected )");
+	if ((paren == "(") and (cur_token.value != ")")) return Error("expected ')'");
+	if ((paren == "[") and (cur_token.value != "]")) return Error("expected ']' after index");
 
 	SetNextToken();
 	return result;
