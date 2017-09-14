@@ -25,12 +25,13 @@ int main(int argc, char* argv[]){
 			cout << "Лексер отработал с ошибками, синтаксический анализатор не начал работу";
 			return -1;
 		}
-		Parser syntax_analyzer;
+		Parser syntax_analyzer(&lexical_analyzer);
 		Node* left = new Node();
 		while (lexical_analyzer.GetLengthDeque() != lexical_analyzer.GetCurIndex()){
-			syntax_analyzer.SetCurrentToken(lexical_analyzer.GetNextToken());
-			syntax_analyzer.Parse(left);
+			left = syntax_analyzer.ParseExpression();
 		}
+		left->PrintNode();
+		cout << endl;
 	}
 	return 0;
 }

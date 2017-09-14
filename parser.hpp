@@ -6,13 +6,18 @@
 
 class Parser{
 public:
-	Parser();
-	Node* Parse(Node* left);
-	Node* Expression();
-	Node* Term();
-	Node* Factor();
-	void SetCurrentToken(Token token);
+	Parser(Scanner* scan);
+	Node* ParsePrimary();
+	Node* ParseExpression();
+	Node* ParseNumber();
+	Node* ParseIdent();
+	Node* ParseBinary(int priority, Node* left);
+	Node* ParseParen();
+	void SetNextToken();
+	int GetPriorityToken();
+	//Handle Error
+	Node* Error(string str);
 private:
 	Token cur_token;
-	int cnt_tokens_in_line;
+	Scanner* scanner;
 };
