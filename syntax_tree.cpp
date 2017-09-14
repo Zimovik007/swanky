@@ -20,11 +20,16 @@ void BinaryNode::PrintNode(){
 }
 
 void CallFuncNode::PrintNode(){
-	cout << " " << func_name << "( ";
-	for (int i = 0; i < args.size() - 1; i++){
-		args[i]->PrintNode(); 
-		cout << ", ";
+	if (args.size()){
+		cout << " " << func_name << "( ";
+		for (int i = 0; i < args.size() - 1; i++){
+			args[i]->PrintNode(); 
+			cout << ", ";
+		}
+		args[args.size() - 1]->PrintNode();
+		cout << ") ";
 	}
-	args[args.size() - 1]->PrintNode();
-	cout << ") ";
+	else{
+		cout << " " << func_name << "() ";
+	}
 }

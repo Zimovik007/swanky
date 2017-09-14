@@ -19,6 +19,7 @@ using namespace std;
 string paren_open = "(";
 string paren_close = ")";
 string comma = ",";
+string semicolon = ";";
 
 map<string, int> priority = {
 	{"@", 5}, 
@@ -64,15 +65,17 @@ Parser::Parser(Scanner* scan){
 }
 
 Node* Parser::ParsePrimary(){
-	int type = cur_token.GetType();
-	
-	if (type == T_operator){
-		if (cur_token.value == paren_open) return ParseParen();
-		return ParseExpression();
+	if (cur_token.value == semicolon){
+		SetNextToken();
+		return ParsePrimary();
 	}
-	if (type == T_integer) return ParseNumber();
-	if (type == T_float  ) return ParseNumber();
-	if (type == T_ident  ) return ParseIdent();
+
+	int type = cur_token.GetType();
+
+	if (cur_token.value == paren_open) return ParseParen();
+	if (type == T_integer) 			   return ParseNumber();
+	if (type == T_float  ) 			   return ParseNumber();
+	if (type == T_ident  ) 			   return ParseIdent();
 
 	return 0;
 }
@@ -88,8 +91,9 @@ Node* Parser::ParseExpression(){
 Node* Parser::ParseBinary(int exp_priority, Node* left){
 	while (true){
 		int cur_token_priority = GetPriorityToken();
-		if (cur_token_priority < exp_priority)
+		if (cur_token_priority < exp_priority){
 			return left;
+		}
 
 		string op = cur_token.value;
 		SetNextToken();
@@ -97,7 +101,6 @@ Node* Parser::ParseBinary(int exp_priority, Node* left){
 		Node* right = ParsePrimary();
 		if (!right)
 			return 0;
-
 		int next_token_priority = GetPriorityToken();
 		if (cur_token_priority < next_token_priority){
 			right = ParseBinary(cur_token_priority, right);

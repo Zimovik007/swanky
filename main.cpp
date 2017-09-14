@@ -26,12 +26,14 @@ int main(int argc, char* argv[]){
 			return -1;
 		}
 		Parser syntax_analyzer(&lexical_analyzer);
-		Node* left = new Node();
-		while (lexical_analyzer.GetLengthDeque() != lexical_analyzer.GetCurIndex()){
-			left = syntax_analyzer.ParseExpression();
+		Node* tree = new Node();
+		while (lexical_analyzer.GetLengthDeque() - 1 != lexical_analyzer.GetCurIndex()){
+			tree = syntax_analyzer.ParseExpression();
+			if (tree){
+				tree->PrintNode();
+				cout << endl;
+			}
 		}
-		left->PrintNode();
-		cout << endl;
 	}
 	return 0;
 }
