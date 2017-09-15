@@ -3,6 +3,7 @@
 #include "token.hpp"
 #include "scanner.hpp"
 #include "syntax_tree.hpp"
+#include "symbol.hpp"
 
 class Parser{
 public:
