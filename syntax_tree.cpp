@@ -3,7 +3,11 @@
 
 using namespace std;
 
-void NumberNode::PrintNode(){
+void IntNode::PrintNode(){
+	cout << value << " ";
+}
+
+void FloatNode::PrintNode(){
 	cout << value << " ";
 }
 

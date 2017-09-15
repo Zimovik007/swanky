@@ -11,9 +11,17 @@ public:
 	virtual void PrintNode(){};
 };
 
-class NumberNode: public Node{
+class IntNode: public Node{
 public:
-	NumberNode(string val){ value = atof(val.c_str()); };
+	IntNode(string val){ value = atoi(val.c_str()); };
+	void PrintNode();
+private:	
+	int value;
+};
+
+class FloatNode: public Node{
+public:
+	FloatNode(string val){ value = atof(val.c_str()); };
 	void PrintNode();
 private:	
 	double value;

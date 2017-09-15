@@ -17,7 +17,8 @@ private:
 	Node* ParseDefinitionFunction();
 	Node* ParsePrimary();
 	Node* ParseExpression();
-	Node* ParseNumber();
+	Node* ParseInt();
+	Node* ParseFloat();
 	Node* ParseIdent();
 	Node* ParseBinary(int priority, Node* left);
 	Node* ParseParen(string paren);

@@ -129,8 +129,8 @@ Node* Parser::ParsePrimary(){
 	int type = cur_token.GetType();
 
 	if (cur_token.value == "(") return ParseParen("(");
-	if (type == T_integer ) 	return ParseNumber();
-	if (type == T_float   ) 	return ParseNumber();
+	if (type == T_integer ) 	return ParseInt();
+	if (type == T_float   ) 	return ParseFloat();
 	if (type == T_ident   ) 	return ParseIdent();
 	if (ToUpper(cur_token.value) == "END"){
 		SetNextToken();
@@ -176,8 +176,14 @@ Node* Parser::ParseBinary(int exp_priority, Node* left){
 	}
 }
 
-Node* Parser::ParseNumber(){
-	Node* node = new NumberNode(cur_token.value);
+Node* Parser::ParseInt(){
+	Node* node = new IntNode(cur_token.value);
+	SetNextToken();
+	return node;
+}
+
+Node* Parser::ParseFloat(){
+	Node* node = new FloatNode(cur_token.value);
 	SetNextToken();
 	return node;
 }
