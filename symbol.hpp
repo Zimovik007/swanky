@@ -6,15 +6,16 @@ using namespace std;
 
 class Symbol{
 public:
-	virtual string GetType() = 0;
-	virtual int IsVar() = 0;
+	Symbol(){};
+	virtual string GetType(){};
+	virtual int IsVar(){};
 };
 
 class VarIntSymbol: public Symbol{
 public:
-	VarIntSymbol(){type = "integer"; is_var = 1;};
-	string GetType();
-	int IsVar();
+	VarIntSymbol(){type = "INTEGER"; is_var = 1;};
+	string GetType() override;
+	int IsVar() override;
 private:
 	string type;
 	int is_var;
@@ -22,9 +23,9 @@ private:
 
 class VarFloatSymbol: public Symbol{
 public:
-	VarFloatSymbol(){type = "float"; is_var = 1;};
-	string GetType();
-	int IsVar();
+	VarFloatSymbol(){type = "FLOAT"; is_var = 1;};
+	string GetType() override;
+	int IsVar() override;
 private:
 	string type;
 	int is_var;
@@ -32,9 +33,9 @@ private:
 
 class VarStringSymbol: public Symbol{
 public:
-	VarStringSymbol(){type = "string"; is_var = 1;};
-	string GetType();
-	int IsVar();
+	VarStringSymbol(){type = "STRING"; is_var = 1;};
+	string GetType() override;
+	int IsVar() override;
 private:
 	string type;
 	int is_var;
@@ -43,12 +44,12 @@ private:
 class VarRecordSymbol: public Symbol{
 public:
 	VarRecordSymbol(map<string, Symbol*> elements){
-		type = "record"; 
+		type = "RECORD"; 
 		is_var = 0; 
 		elems = elements;
 	};
-	string GetType();
-	int IsVar();
+	string GetType() override;
+	int IsVar() override;
 	map<string, Symbol*> GetMapElements();
 private:
 	string type;
@@ -58,28 +59,29 @@ private:
 
 class VarArraySymbol: public Symbol{
 public:
-	VarArraySymbol(int i_start, int i_end, string type_e){
-		type = "array";
-		type_elems = type_e; 
+	VarArraySymbol(int i_start, int i_end, Symbol* type_e){
+		type = "ARRAY";
+		//type_elems = type_e; 
 		is_var = 1;
 		index_start = i_start;
 		index_end = i_end;
 	};
-	string GetType();
-	string GetTypeElements();
-	int IsVar();
+	string GetType() override;
+	Symbol* GetTypeElements();
+	int IsVar() override;
 	int IndexStart();
 	int IndexEnd();
 private:
-	string type, type_elems;
+	string type;
+	Symbol* type_elems;
 	int is_var, index_start, index_end;
 };
 
 class ConstIntSymbol: public Symbol{
 public:
-	ConstIntSymbol(){type = "integer"; is_var = 0;};
-	string GetType();
-	int IsVar();
+	ConstIntSymbol(){type = "INTEGER"; is_var = 0;};
+	string GetType() override;
+	int IsVar() override;
 private:
 	string type;
 	int is_var;
@@ -87,9 +89,9 @@ private:
 
 class ConstFloatSymbol: public Symbol{
 public:
-	ConstFloatSymbol(){type = "float"; is_var = 0;};
-	string GetType();
-	int IsVar();
+	ConstFloatSymbol(){type = "FLOAT"; is_var = 0;};
+	string GetType() override;
+	int IsVar() override;
 private:
 	string type;
 	int is_var;
@@ -97,9 +99,9 @@ private:
 
 class ConstStringSymbol: public Symbol{
 public:
-	ConstStringSymbol(){type = "string"; is_var = 0;};
-	string GetType();
-	int IsVar();
+	ConstStringSymbol(){type = "STRING"; is_var = 0;};
+	string GetType() override;
+	int IsVar() override;
 private:
 	string type;
 	int is_var;
@@ -108,12 +110,12 @@ private:
 class ConstRecordSymbol: public Symbol{
 public:
 	ConstRecordSymbol(map<string, Symbol*> elements){
-		type = "record"; 
+		type = "RECORD"; 
 		is_var = 0; 
 		elems = elements;
 	};
-	string GetType();
-	int IsVar();
+	string GetType() override;
+	int IsVar() override;
 	map<string, Symbol*> GetMapElements();
 private:
 	string type;
@@ -123,20 +125,21 @@ private:
 
 class ConstArraySymbol: public Symbol{
 public:
-	ConstArraySymbol(int i_start, int i_end, string type_e){
-		type = "array";
-		type_elems = type_e; 
+	ConstArraySymbol(int i_start, int i_end, Symbol* type_e){
+		type = "ARRAY";
+		//type_elems = type_e; 
 		is_var = 0;
 		index_start = i_start;
 		index_end = i_end;
 	};
-	string GetType();
-	string GetTypeElements();
-	int IsVar();
+	string GetType() override;
+	Symbol* GetTypeElements();
+	int IsVar() override;
 	int IndexStart();
 	int IndexEnd();
 private:
-	string type, type_elems;
+	string type;
+	Symbol* type_elems;
 	int is_var, index_start, index_end;
 };
 
@@ -146,14 +149,14 @@ public:
 		map_params = map_p; 
 		vec_params = vec_p; 
 		is_var = 1; 
-		type = "function";
+		type = "FUNCTION";
 		return_type = re_type;
 	};
 	map<string, Symbol*> GetMapElements();
 	vector<Symbol*> GetVecElements();
-	string GetType();
+	string GetType() override;
 	string GetReturnType();
-	int IsVar();
+	int IsVar() override;
 private:
 	int is_var;
 	string type, return_type;

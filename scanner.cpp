@@ -8,9 +8,9 @@ enum reserved_words{
 	_AND, _ASM, _ARRAY,	_BEGIN,	_CASE, _CONST, _CONSTRUCTOR,
 	_DESTRUCTOR, _DIV, _DO,	_DOWNTO, _ELSE,	_END, _EXPORTS,
 	_FILE, _FOR, _FUNCTION,	_GOTO, _IF, _IMPL,
-	_IN, _INHERITED, _INLINE, _INTERFACE, _LABEL, _LIBRARY,
+	_IN, _INHERITED, _INLINE, _INTERFACE, _INTEGER_, _LABEL, _LIBRARY,
 	_MOD, _NIL, _NOT, _OBJECT, _OF, _OR, _PACKED, _PROCEDURE,
-	_PROGRAM, _RECORD, _REPEAT, _SET, _SHL, _SHR, _STRING,
+	_PROGRAM, _RECORD, _REPEAT, _REAL, _SET, _SHL, _SHR, _STRING,
 	_THEN, _TO, _TYPE, _UNIT, _UNTIL, _USES, _VAR, _WHILE, _WITH, _XOR
 };
 
@@ -25,12 +25,13 @@ map<string, int> rw = {
 	{"GOTO", _GOTO},   
 	{"IF", _IF},                 {"IMPLEMENTATION", _IMPL}, {"IN", _IN}, 
 	{"INHERITED", _INHERITED},   {"INLINE", _INLINE},       {"INTERFACE", _INTERFACE}, 
+	{"INTEGER", _INTEGER_},
 	{"LABEL", _LABEL},           {"LIBRARY", _LIBRARY}, 
 	{"MOD", _MOD}, 
 	{"NIL", _NIL},               {"NOT", _NOT}, 
 	{"OBJECT", _OBJECT},         {"OF", _OF},               {"OR", _OR}, 
 	{"PACKED", _PACKED},         {"PROCEDURE", _PROCEDURE}, {"PROGRAM", _PROGRAM}, 
-	{"RECORD", _RECORD},         {"REPEAT", _REPEAT}, 
+	{"RECORD", _RECORD},         {"REPEAT", _REPEAT}, 		{"REAL", _REAL},
 	{"SET", _SET},               {"SHL", _SHL},             {"SHR", _SHR},                 
 	{"STRING", _STRING}, 
 	{"THEN", _THEN},             {"TO", _TO},               {"TYPE", _TYPE}, 
@@ -70,7 +71,10 @@ Scanner::Scanner(string text){
 }
 
 Token Scanner::GetNextToken(){
-	return dTokens[index_token++];
+	if (index_token != dTokens.size())
+		return dTokens[index_token++];
+	else
+		return dTokens[index_token];
 }
 
 int Scanner::GetCurIndex(){

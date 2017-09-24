@@ -1,6 +1,4 @@
 #include "symbol.hpp"
-#include <map>
-#include <vector>
 
 using namespace std;
 
@@ -66,7 +64,7 @@ int VarArraySymbol::IndexEnd(){
 	return index_end;
 }
 
-string VarArraySymbol::GetTypeElements(){
+Symbol* VarArraySymbol::GetTypeElements(){
 	return type_elems;
 }
 
@@ -132,7 +130,7 @@ int ConstArraySymbol::IndexEnd(){
 	return index_end;
 }
 
-string ConstArraySymbol::GetTypeElements(){
+Symbol* ConstArraySymbol::GetTypeElements(){
 	return type_elems;
 }
 

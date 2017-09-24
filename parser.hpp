@@ -10,11 +10,11 @@ public:
 	Parser(Scanner* scan);
 	void Parse();
 private:
-	Node* ParseVar();
-	Node* ParseConst();
-	Node* ParseBodyProgramm();
-	Node* ParseDefinitionRecord();
-	Node* ParseDefinitionFunction();
+	int ParseVar();
+	int ParseConst();
+	int ParseBodyProgramm();
+	int ParseDefinitionRecord();
+	int ParseDefinitionFunction();
 	Node* ParsePrimary();
 	Node* ParseExpression();
 	Node* ParseInt();
@@ -24,10 +24,17 @@ private:
 	Node* ParseParen(string paren);
 	void SetNextToken();
 	int GetPriorityToken();
+	Symbol* GetSymbolTypeOfArray();
+	int ProcessingTypes(int type, vector<string> idents, int is_var);
+	int IsType(string type);
+	void PushFromTableSymbols(string name, Symbol* symbol);
 	string ToUpper(string str);
 	//Handle Error
 	Node* Error(string str);
 	Token cur_token;
 	Scanner* scanner;
-	int used_var, used_const, used_begin, is_end;
+	int used_var, used_const, used_begin, used_type, used_function, is_end;
+	vector<string> types;
+	map<string, map<string, Symbol*>> record_fields;
+	map<string, Symbol*> table_symbols;
 };
