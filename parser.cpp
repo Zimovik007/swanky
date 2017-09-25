@@ -245,7 +245,7 @@ int Parser::ParseVar(){
 	}
 	used_var = 1;
 	used_type = 1;
-	return 1;
+	return ParseDefinitionIdent(1);
 }
 
 int Parser::ParseConst(){
@@ -261,6 +261,10 @@ int Parser::ParseConst(){
 	used_const = 1;
 	used_type = 1;
 
+	return ParseDefinitionIdent(0);
+}
+
+int Parser::ParseDefinitionIdent(int is_var){
 	while(true){
 		vector<string> name_idents;
 		if (cur_token.GetType() == T_ident){
@@ -278,7 +282,7 @@ int Parser::ParseConst(){
 			}
 			if (cur_token.value == ":"){
 				SetNextToken();
-				ProcessingTypes(IsType(cur_token.value), name_idents, 0);
+				ProcessingTypes(IsType(cur_token.value), name_idents, is_var);
 				if (cur_token.value != ";"){
 					Error("expected ';'");
 				}

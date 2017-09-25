@@ -12,6 +12,7 @@ public:
 private:
 	int ParseVar();
 	int ParseConst();
+	int ParseDefinitionIdent(int is_var);
 	int ParseBodyProgramm();
 	int ParseDefinitionRecord();
 	int ParseDefinitionFunction();
