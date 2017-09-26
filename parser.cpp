@@ -36,30 +36,31 @@ map<string, int> priority = {
 	{":=", 1} 
 };
 
-void Parser::PushFromTableSymbols(string name, Symbol* symbol){
-	if (!table_symbols.find(name)->second){
-		table_symbols[name] = symbol;
-	}
-	else{
-		Error("identifier '" + name + "' duplicated");
-	}
+map<string, Symbol*> Parser::PushFromTableSymbols(string name, Symbol* symbol, map<string, Symbol*> table){
+	for(auto& item : table)
+    	if (item.first == name){
+    		Error("identifier '" + name + "' duplicated");
+    		return table;
+    	}
+    table[name] = symbol;
+    last_push_symbol_from_table_symbols = symbol;
+	return table;
 }
 
 int Parser::IsType(string type){
 	string upper = ToUpper(type);
-	for (int i = 0; i < types.size(); i++){
-		if (types[i] == upper){
-			return 1;
-		}
-	}
+	for(auto& item : types)
+    	if (item.first == upper)
+    		return 1;
 	return 0;
 }
 
-int Parser::ProcessingTypes(int type, vector<string> idents, int is_var){
+map<string, Symbol*> Parser::ProcessingTypes(int type, vector<string> idents, int is_var, map<string, Symbol*> table){
 	if (!type){
 		Error("It is not a type");
-		return 0;
+		return table;
 	}
+	else
 	if (ToUpper(cur_token.value) == "ARRAY"){
 		int start_i, end_i;
 		SetNextToken();
@@ -82,53 +83,60 @@ int Parser::ProcessingTypes(int type, vector<string> idents, int is_var){
 									if (is_var){
 										for (int i = 0; i < idents.size(); i++){
 											Symbol* symbol = new VarArraySymbol(start_i, end_i, type_elem_array);
-											PushFromTableSymbols(idents[i], symbol);
+											table = PushFromTableSymbols(idents[i], symbol, table);
 										}
 									}
 									else{
 										for (int i = 0; i < idents.size(); i++){
 											Symbol* symbol = new ConstArraySymbol(start_i, end_i, type_elem_array);
-											PushFromTableSymbols(idents[i], symbol);
+											table = PushFromTableSymbols(idents[i], symbol, table);
 										}
 									}
 								}
 								else{
 									Error("in can not create multidimensional arrays in this version of the compiler");
+									return table;
 								}
 							}
 							else{
 								Error("expected 'OF' word");
+								return table;
 							}
 						}
 						else{
 							Error("expected ']' symbol");
+							return table;
 						}
 					}
 					else{
 						Error("bound of the array must be a number");
+						return table;
 					}
 				}
 				else{
 					Error("split the array bounds must be two dots");
+					return table;
 				}
 			}
 			else{
 				Error("bound of the array must be a number");
+				return table;
 			}
 		}
 		else{
 			Error("expected '[' symbol");
+			return table;
 		}
 	}
 	else if (ToUpper(cur_token.value) == "INTEGER"){
 		for (int i = 0; i < idents.size(); i++){
 			if (is_var){
 				Symbol* symbol = new VarIntSymbol();
-				PushFromTableSymbols(idents[i], symbol);
+				table = PushFromTableSymbols(idents[i], symbol, table);
 			}
 			else{
 				Symbol* symbol = new ConstIntSymbol();
-				PushFromTableSymbols(idents[i], symbol);
+				table = PushFromTableSymbols(idents[i], symbol, table);
 			}
 		}
 	}
@@ -136,11 +144,11 @@ int Parser::ProcessingTypes(int type, vector<string> idents, int is_var){
 		for (int i = 0; i < idents.size(); i++){
 			if (is_var){
 				Symbol* symbol = new VarFloatSymbol();
-				PushFromTableSymbols(idents[i], symbol);
+				table = PushFromTableSymbols(idents[i], symbol, table);
 			}
 			else{
 				Symbol* symbol = new ConstFloatSymbol();
-				PushFromTableSymbols(idents[i], symbol);
+				table = PushFromTableSymbols(idents[i], symbol, table);
 			}
 		}
 	}
@@ -148,11 +156,11 @@ int Parser::ProcessingTypes(int type, vector<string> idents, int is_var){
 		for (int i = 0; i < idents.size(); i++){
 			if (is_var){
 				Symbol* symbol = new VarStringSymbol();
-				PushFromTableSymbols(idents[i], symbol);
+				table = PushFromTableSymbols(idents[i], symbol, table);
 			}
 			else{
 				Symbol* symbol = new ConstStringSymbol();
-				PushFromTableSymbols(idents[i], symbol);
+				table = PushFromTableSymbols(idents[i], symbol, table);
 			}
 		}
 	}
@@ -161,16 +169,16 @@ int Parser::ProcessingTypes(int type, vector<string> idents, int is_var){
 			map<string, Symbol*> r_fields = record_fields.find(cur_token.value)->second;
 			if (is_var){
 				Symbol* symbol = new VarRecordSymbol(r_fields);
-				PushFromTableSymbols(idents[i], symbol);
+				table = PushFromTableSymbols(idents[i], symbol, table);
 			}
 			else{
 				Symbol* symbol = new ConstRecordSymbol(r_fields);
-				PushFromTableSymbols(idents[i], symbol);
+				table = PushFromTableSymbols(idents[i], symbol, table);
 			}
 		}		 
 	}
 	SetNextToken();
-	return 1;
+	return table;
 }
 
 Symbol* Parser::GetSymbolTypeOfArray(){
@@ -202,10 +210,11 @@ Parser::Parser(Scanner* scan){
 	used_type = 0;
 	used_function = 0;
 	is_end = 0;
-	types.push_back("INTEGER");
-	types.push_back("REAL");
-	types.push_back("STRING");
-	types.push_back("ARRAY");
+	map<string, Symbol*> init;
+	types["INTEGER"] = init;
+	types["REAL"] = init;
+	types["STRING"] = init;
+	types["ARRAY"] = init;
 }
 
 void Parser::Parse(){
@@ -228,36 +237,46 @@ void Parser::Parse(){
     			cout << item.first << "|";
 			}
 			cout << endl;
+			cout << "Типы данных:" << endl << "|";
+			for(auto& item : types)
+			{
+    			cout << item.first << "|";
+			}
+			cout << endl;
 			return;
+		}
+		else{
+			Error("who knows what to do with it?");
+			SetNextToken();
 		}
 	}
 }
 
 int Parser::ParseVar(){
-	SetNextToken();
 	if (used_var){
-		Error("The 'var' previously");
+		Error("The 'var' previously", 0);
 		return 1;
 	}
 	if (used_function){
-		Error("The 'var' should be above the function declarations");
+		Error("The 'var' should be above the function declarations", 0);
 		return 1;
 	}
+	SetNextToken();
 	used_var = 1;
 	used_type = 1;
 	return ParseDefinitionIdent(1);
 }
 
 int Parser::ParseConst(){
-	SetNextToken();
 	if (used_const){
-		Error("The 'const' previously");
+		Error("The 'const' previously", 0);
 		return 1;
 	}
 	if (used_function){
-		Error("The 'const' should be above the function declarations");
+		Error("The 'const' should be above the function declarations", 0);
 		return 1;
 	}
+	SetNextToken();
 	used_const = 1;
 	used_type = 1;
 
@@ -282,7 +301,7 @@ int Parser::ParseDefinitionIdent(int is_var){
 			}
 			if (cur_token.value == ":"){
 				SetNextToken();
-				ProcessingTypes(IsType(cur_token.value), name_idents, is_var);
+				table_symbols = ProcessingTypes(IsType(cur_token.value), name_idents, is_var, table_symbols);
 				if (cur_token.value != ";"){
 					Error("expected ';'");
 				}
@@ -319,29 +338,163 @@ int Parser::ParseBodyProgramm(){
 }
 
 int Parser::ParseDefinitionRecord(){
-	SetNextToken();
 	if (used_type){
-		Error("The 'type' previously or should be placed above");
+		Error("The 'type' previously or should be placed above", 0);
 		return 1;
 	}
 	if (used_function){
-		Error("The 'type' should be above the function declarations");
+		Error("The 'type' should be above the function declarations", 0);
 		return 1;
 	}
 	if (used_const){
-		Error("The 'type' should be above the function declarations");
+		Error("The 'type' should be above the function declarations", 0);
 		return 1;
 	}
 	if (used_var){
-		Error("The 'type' should be above the function declarations");
+		Error("The 'type' should be above the function declarations", 0);
 		return 1;
 	}
 	used_type = 1;
+	SetNextToken();
+
+	while(true){
+		if (cur_token.GetType() == T_ident){
+			string record_name = cur_token.value;
+			SetNextToken();
+			if (cur_token.value == "="){
+				SetNextToken();
+				if (ToUpper(cur_token.value) == "RECORD"){
+					map<string, Symbol*> record_fields;
+					SetNextToken();
+					while(ToUpper(cur_token.value) != "END"){
+						vector<string> name_idents;
+						if (cur_token.GetType() == T_ident){
+							name_idents.push_back(cur_token.value);
+							SetNextToken();
+							while(cur_token.value == ","){
+								SetNextToken();
+								if (cur_token.GetType() == T_ident){
+									name_idents.push_back(cur_token.value);
+									SetNextToken();
+								}
+								else{
+									Error("expected identifier");
+								}
+							}
+							if (cur_token.value == ":"){
+								SetNextToken();
+								record_fields = ProcessingTypes(IsType(cur_token.value), name_idents, 1, record_fields);
+								SetNextToken();
+								if (cur_token.value == ";")	SetNextToken();
+							}
+							else{
+								Error("expected ':'");
+							}
+						}
+						else{
+							Error("it is not a identifier");
+						}
+					}
+					types[ToUpper(record_name)] = record_fields;
+					SetNextToken();
+					if (cur_token.value == ";") SetNextToken();
+				}
+				else{
+					Error("expected 'RECORD' keyword");
+				}
+			}
+			else{
+				Error("expected '='");
+			}
+		}
+		else 
+			if ((ToUpper(cur_token.value) == "VAR")      || 
+				(ToUpper(cur_token.value) == "CONST")    || 
+				(ToUpper(cur_token.value) == "FUNCTION") || 
+				(ToUpper(cur_token.value) == "TYPE")     || 
+				(ToUpper(cur_token.value) == "BEGIN"))
+				return 1;
+		else{				
+			Error("it is uncorrect name of identifier");
+		}
+	}
+
 	return 1;
 }
 
 int Parser::ParseDefinitionFunction(){
 	SetNextToken();
+	if (cur_token.GetType() == T_ident){
+		string func_name = cur_token.value;
+		SetNextToken();
+		if (cur_token.value == "("){
+			SetNextToken();
+			map<string, Symbol*> func_param_map;
+			vector<Symbol*> func_param_vector;
+			while(cur_token.value != ")"){
+				vector<string> name_idents;
+				if (cur_token.GetType() == T_ident){
+					int cnt = 1;
+					name_idents.push_back(cur_token.value);
+					SetNextToken();
+					while(cur_token.value == ","){
+						SetNextToken();
+						if (cur_token.GetType() == T_ident){
+							cnt++;
+							name_idents.push_back(cur_token.value);
+							SetNextToken();
+						}
+						else{
+							Error("expected identifier", 0);
+							break;
+						}
+					}
+					if (cur_token.value == ":"){
+						SetNextToken();
+						func_param_map = ProcessingTypes(IsType(cur_token.value), name_idents, 1, func_param_map);
+						if (cur_token.value == ";")	SetNextToken();
+						while (cnt){
+							cnt--;
+							func_param_vector.push_back(last_push_symbol_from_table_symbols);
+						}
+					}
+					else{
+						Error("expected ':'", 0);
+						break;
+					}
+				}
+				else{
+					Error("it is not a identifier", 0);
+					break;
+				}
+			}
+			SetNextToken();
+			if (cur_token.value == ":"){
+				SetNextToken();
+				if (IsType(cur_token.value)){
+					string return_type = cur_token.value;
+					Symbol* symbol = new FuncSymbol(func_param_map, func_param_vector, return_type);
+					table_symbols = PushFromTableSymbols(func_name, symbol, table_symbols);
+					SetNextToken();
+					if (cur_token.value != ";"){
+						Error("expected ';'");
+					}
+					else{
+						SetNextToken();
+					}
+				}
+				else{
+					Error("a nonexistent data type", 0);
+				}
+			}
+			else{
+				Error("expected ':'", 0);
+			}
+		}
+	}
+	else{
+		Error("expected name of function", 0);
+	}
 	return 1;
 }
 
@@ -358,8 +511,21 @@ int Parser::GetPriorityToken(){
 		return -1;
 }
 
-Node* Parser::Error(string str){
-	cout << "Error: " << str << endl;
+Node* Parser::Error(string str, int move){
+	cur_token.PrintToken(0); 
+	cout <<  " |=> " << "Error: " << str << endl;
+	if ((cur_token.value != ";") && (cur_token.GetType() != T_eof))
+		SetNextToken();
+	if (move){
+		while ((cur_token.value != ";") && (cur_token.GetType() != T_eof) && (ToUpper(cur_token.value) != "VAR") && (ToUpper(cur_token.value) != "CONST") && (ToUpper(cur_token.value) != "FUNCTION") && (ToUpper(cur_token.value) != "TYPE") && (ToUpper(cur_token.value) != "BEGIN")){
+			SetNextToken();
+		}
+	}
+	else{
+		while((cur_token.GetType() != T_eof) && (ToUpper(cur_token.value) != "VAR") && (ToUpper(cur_token.value) != "CONST") && (ToUpper(cur_token.value) != "FUNCTION") && (ToUpper(cur_token.value) != "TYPE") && (ToUpper(cur_token.value) != "BEGIN")){
+			SetNextToken();
+		}
+	}
 	return 0;
 }
 
@@ -372,7 +538,6 @@ Node* Parser::ParsePrimary(){
 		SetNextToken();
 		return ParsePrimary();
 	}
-
 	int type = cur_token.GetType();
 
 	if (cur_token.value == "(") return ParseParen("(");
@@ -397,7 +562,9 @@ Node* Parser::ParseExpression(){
 	
 	if (!left_sub_tree) return 0;
 
-	return ParseBinary(0, left_sub_tree);
+	Node* node = ParseBinary(0, left_sub_tree);
+
+	return node;
 }
 
 Node* Parser::ParseBinary(int exp_priority, Node* left){
@@ -437,6 +604,10 @@ Node* Parser::ParseFloat(){
 
 Node* Parser::ParseIdent(){
 	string name = cur_token.value;
+	if (!IssetIdent(name)){
+		Error("identifier was not found");
+		return 0;
+	}
 	SetNextToken();
 	if (cur_token.value != "("){
 		if (cur_token.value != "["){
@@ -480,3 +651,10 @@ Node* Parser::ParseParen(string paren){
 	return result;
 }
 
+int Parser::IssetIdent(string name){
+	for(auto& item : table_symbols)
+    	if (item.first == name){
+    		return 1;
+    	}
+    return 0;
+}

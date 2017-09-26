@@ -24,18 +24,20 @@ private:
 	Node* ParseBinary(int priority, Node* left);
 	Node* ParseParen(string paren);
 	void SetNextToken();
+	int IssetIdent(string name);
 	int GetPriorityToken();
 	Symbol* GetSymbolTypeOfArray();
-	int ProcessingTypes(int type, vector<string> idents, int is_var);
+	map<string, Symbol*> ProcessingTypes(int type, vector<string> idents, int is_var, map<string, Symbol*> table);
 	int IsType(string type);
-	void PushFromTableSymbols(string name, Symbol* symbol);
+	map<string, Symbol*> PushFromTableSymbols(string name, Symbol* symbol, map<string, Symbol*> table);
 	string ToUpper(string str);
 	//Handle Error
-	Node* Error(string str);
+	Node* Error(string str, int move = 1);
 	Token cur_token;
 	Scanner* scanner;
 	int used_var, used_const, used_begin, used_type, used_function, is_end;
-	vector<string> types;
+	map<string, map<string, Symbol*>> types;
 	map<string, map<string, Symbol*>> record_fields;
 	map<string, Symbol*> table_symbols;
+	Symbol* last_push_symbol_from_table_symbols;
 };

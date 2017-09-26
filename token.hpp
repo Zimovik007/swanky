@@ -39,7 +39,7 @@ public:
 		type = right.type;
 		source = right.source;
 	}
-	int PrintToken();
+	int PrintToken(int endl = 1);
 	int GetType();
 	pos token_pos;
 	std::string value;

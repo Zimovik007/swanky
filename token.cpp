@@ -22,7 +22,7 @@ Token::Token(char _value, char _source, pos _token_pos, int _type){
 	type = _type;
 }
 
-int Token::PrintToken(){
+int Token::PrintToken(int endl){
 	int offset_pos = 5 + to_string(token_pos.y).length() + to_string(token_pos.x).length();
 	cout << "(" << token_pos.y << ", " << token_pos.x << ") ";
 	for (int i = 0; i < 10 - offset_pos; i++){
@@ -32,7 +32,9 @@ int Token::PrintToken(){
 	for (int i = 0; i < 17 - tp[type].length(); i++){
 		cout << " ";
 	}
-	cout << value << "  ~" << source << "~" << endl; 
+	cout << value << "  ~" << source << "~";
+	if (endl)
+		cout << endl;
 	return 0;
 }
 
