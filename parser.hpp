@@ -4,6 +4,7 @@
 #include "scanner.hpp"
 #include "syntax_tree.hpp"
 #include "symbol.hpp"
+#include "block.hpp"
 
 class Parser{
 public:
@@ -16,6 +17,7 @@ private:
 	int ParseBodyProgramm();
 	int ParseDefinitionRecord();
 	int ParseDefinitionFunction();
+	Block* ParseBodyFunction();
 	Node* ParsePrimary();
 	Node* ParseExpression();
 	Node* ParseInt();

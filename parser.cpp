@@ -423,6 +423,7 @@ int Parser::ParseDefinitionRecord(){
 }
 
 int Parser::ParseDefinitionFunction(){
+	used_function = 1;
 	SetNextToken();
 	if (cur_token.GetType() == T_ident){
 		string func_name = cur_token.value;
@@ -473,14 +474,17 @@ int Parser::ParseDefinitionFunction(){
 				SetNextToken();
 				if (IsType(cur_token.value)){
 					string return_type = cur_token.value;
-					Symbol* symbol = new FuncSymbol(func_param_map, func_param_vector, return_type);
-					table_symbols = PushFromTableSymbols(func_name, symbol, table_symbols);
 					SetNextToken();
 					if (cur_token.value != ";"){
 						Error("expected ';'");
 					}
 					else{
 						SetNextToken();
+						Block* body_function = ParseBodyFunction();
+						if (body_function){
+							Symbol* symbol = new FuncSymbol(func_param_map, func_param_vector, return_type, body_function);
+							table_symbols = PushFromTableSymbols(func_name, symbol, table_symbols);
+						}
 					}
 				}
 				else{
@@ -496,6 +500,62 @@ int Parser::ParseDefinitionFunction(){
 		Error("expected name of function", 0);
 	}
 	return 1;
+}
+
+Block* Parser::ParseBodyFunction(){
+	Block* body_function = new Block();
+	if (ToUpper(cur_token.value) == "VAR"){
+		SetNextToken();
+		while (ToUpper(cur_token.value) != "BEGIN"){
+			vector<string> name_idents;
+			if (cur_token.GetType() == T_ident){
+				name_idents.push_back(cur_token.value);
+				SetNextToken();
+				while(cur_token.value == ","){
+					SetNextToken();
+					if (cur_token.GetType() == T_ident){
+						name_idents.push_back(cur_token.value);
+						SetNextToken();
+					}
+					else{
+						Error("expected identifier", 0);
+						break;
+					}
+				}
+				if (cur_token.value == ":"){
+					SetNextToken();
+					body_function->PushLocalVariables(ProcessingTypes(IsType(cur_token.value), name_idents, 1, body_function->GetLocalVariables()));
+					if (cur_token.value == ";")	SetNextToken();
+				}
+				else{
+					Error("expected ':'", 0);
+					break;
+				}
+			}
+			else{
+				Error("it is not a identifier", 0);
+				break;
+			}
+		}
+	}
+	if (ToUpper(cur_token.value) == "BEGIN"){
+		SetNextToken();
+		while (ToUpper(cur_token.value) != "END"){
+
+		}
+		SetNextToken();
+		if (cur_token.value != ";"){
+			Error("expected ';'");
+		}
+		else{
+			SetNextToken();
+		}
+	}
+	else{
+		Error("expected either 'begin' or 'var'", 0);
+		return 0;
+	}
+	return body_function;
 }
 
 string Parser::ToUpper(string str){

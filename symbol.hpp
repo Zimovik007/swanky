@@ -2,6 +2,8 @@
 #include <map>
 #include <vector>
 
+#include "block.hpp"
+
 using namespace std;
 
 class Symbol{
@@ -145,12 +147,13 @@ private:
 
 class FuncSymbol: public Symbol{
 public:
-	FuncSymbol(map<string, Symbol*> map_p, vector<Symbol*> vec_p, string re_type){
+	FuncSymbol(map<string, Symbol*> map_p, vector<Symbol*> vec_p, string re_type, Block* body){
 		map_params = map_p; 
 		vec_params = vec_p; 
 		is_var = 1; 
 		type = "FUNCTION";
 		return_type = re_type;
+		body_function = body;
 	};
 	map<string, Symbol*> GetMapElements();
 	vector<Symbol*> GetVecElements();
@@ -162,4 +165,5 @@ private:
 	string type, return_type;
 	map<string, Symbol*> map_params;
 	vector<Symbol*> vec_params;
+	Block* body_function;
 };
