@@ -474,13 +474,16 @@ int Parser::ParseDefinitionFunction(){
 				SetNextToken();
 				if (IsType(cur_token.value)){
 					string return_type = cur_token.value;
-					SetNextToken();
+					vector<string> type;
+					type.push_back("result");
+					Block* body_function = new Block();
+					body_function->PushLocalVariables(ProcessingTypes(IsType(return_type), type, 1, body_function->GetLocalVariables()));
 					if (cur_token.value != ";"){
 						Error("expected ';'");
 					}
 					else{
 						SetNextToken();
-						Block* body_function = ParseBodyFunction();
+						body_function = ParseBodyFunction(body_function->GetLocalVariables());
 						if (body_function){
 							Symbol* symbol = new FuncSymbol(func_param_map, func_param_vector, return_type, body_function);
 							table_symbols = PushFromTableSymbols(func_name, symbol, table_symbols);
@@ -502,8 +505,9 @@ int Parser::ParseDefinitionFunction(){
 	return 1;
 }
 
-Block* Parser::ParseBodyFunction(){
+Block* Parser::ParseBodyFunction(map<string, Symbol*> res){
 	Block* body_function = new Block();
+	body_function->PushLocalVariables(res);
 	if (ToUpper(cur_token.value) == "VAR"){
 		SetNextToken();
 		while (ToUpper(cur_token.value) != "BEGIN"){

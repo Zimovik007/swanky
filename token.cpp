@@ -34,7 +34,7 @@ int Token::PrintToken(int endl){
 	}
 	cout << value << "  ~" << source << "~";
 	if (endl)
-		cout << endl;
+		cout << "\n";
 	return 0;
 }
 

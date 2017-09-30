@@ -3,25 +3,25 @@
 #include <map>
 
 enum types{
-	_OPERATOR,
-	_LITERAL,
-	_INTEGER,
-	_FLOAT,
-	_IDENT,
-	_SEPARATOR,
-	_RESERVED_WORD,
-	_EOF,
+	_OPERATOR_,
+	_LITERAL_,
+	_INTEGER_,
+	_FLOAT_,
+	_IDENT_,
+	_SEPARATOR_,
+	_RESERVED_WORD_,
+	_EOF_,
 };
 
 static std::map<int, std::string> tp = {
-	{_OPERATOR, "operator"},
-	{_LITERAL, "string literal"},
-	{_INTEGER, "integer literal"},
-	{_FLOAT, "float literal"},
-	{_IDENT, "identifier"},
-	{_SEPARATOR, "separator"},
-	{_RESERVED_WORD, "reserved"},
-	{_EOF, "[end of file]"},
+	{_OPERATOR_, "operator"},
+	{_LITERAL_, "string literal"},
+	{_INTEGER_, "integer literal"},
+	{_FLOAT_, "float literal"},
+	{_IDENT_, "identifier"},
+	{_SEPARATOR_, "separator"},
+	{_RESERVED_WORD_, "reserved"},
+	{_EOF_, "[end of file]"},
 };
 
 typedef struct Position{
