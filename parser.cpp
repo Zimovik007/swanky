@@ -325,7 +325,7 @@ int Parser::ParseBodyProgramm(){
 	SetNextToken();
 	Node* tree = new Node();
 	while (scanner->GetLengthDeque() - 1 > scanner->GetCurIndex()){
-		tree = ParseExpression();
+		tree = ParseExpression(table_symbols);
 		if (tree){
 			tree->PrintNode();
 			cout << endl;
@@ -424,6 +424,7 @@ int Parser::ParseDefinitionRecord(){
 
 int Parser::ParseDefinitionFunction(){
 	used_function = 1;
+	vector<string> name_idents;
 	SetNextToken();
 	if (cur_token.GetType() == T_ident){
 		string func_name = cur_token.value;
@@ -433,7 +434,6 @@ int Parser::ParseDefinitionFunction(){
 			map<string, Symbol*> func_param_map;
 			vector<Symbol*> func_param_vector;
 			while(cur_token.value != ")"){
-				vector<string> name_idents;
 				if (cur_token.GetType() == T_ident){
 					int cnt = 1;
 					name_idents.push_back(cur_token.value);
@@ -474,10 +474,11 @@ int Parser::ParseDefinitionFunction(){
 				SetNextToken();
 				if (IsType(cur_token.value)){
 					string return_type = cur_token.value;
-					vector<string> type;
-					type.push_back("result");
+					vector<string> vars;
+					vars = name_idents;
+					vars.push_back("result");
 					Block* body_function = new Block();
-					body_function->PushLocalVariables(ProcessingTypes(IsType(return_type), type, 1, body_function->GetLocalVariables()));
+					body_function->PushLocalVariables(ProcessingTypes(IsType(return_type), vars, 1, body_function->GetLocalVariables()));
 					if (cur_token.value != ";"){
 						Error("expected ';'");
 					}
@@ -545,7 +546,10 @@ Block* Parser::ParseBodyFunction(map<string, Symbol*> res){
 	if (ToUpper(cur_token.value) == "BEGIN"){
 		SetNextToken();
 		while (ToUpper(cur_token.value) != "END"){
-
+			body_function->AddToBlock(ParseExpression(body_function->GetLocalVariables()));
+			if (cur_token.value == ";"){
+				SetNextToken();
+			}
 		}
 		SetNextToken();
 		if (cur_token.value != ";"){
@@ -597,17 +601,17 @@ void Parser::SetNextToken(){
 	cur_token = scanner->GetNextToken();
 }
 
-Node* Parser::ParsePrimary(){
+Node* Parser::ParsePrimary(map<string, Symbol*> variables){
 	if (cur_token.value == ";"){
 		SetNextToken();
-		return ParsePrimary();
+		return ParsePrimary(variables);
 	}
 	int type = cur_token.GetType();
 
 	if (cur_token.value == "(") return ParseParen("(");
 	if (type == T_integer ) 	return ParseInt();
 	if (type == T_float   ) 	return ParseFloat();
-	if (type == T_ident   ) 	return ParseIdent();
+	if (type == T_ident   ) 	return ParseIdent(variables);
 	if (ToUpper(cur_token.value) == "END"){
 		SetNextToken();
 		if (cur_token.value == "."){
@@ -621,17 +625,17 @@ Node* Parser::ParsePrimary(){
 	return 0;
 }
 
-Node* Parser::ParseExpression(){
-	Node* left_sub_tree = ParsePrimary();
+Node* Parser::ParseExpression(map<string, Symbol*> variables){
+	Node* left_sub_tree = ParsePrimary(variables);
 	
 	if (!left_sub_tree) return 0;
 
-	Node* node = ParseBinary(0, left_sub_tree);
+	Node* node = ParseBinary(0, left_sub_tree, variables);
 
 	return node;
 }
 
-Node* Parser::ParseBinary(int exp_priority, Node* left){
+Node* Parser::ParseBinary(int exp_priority, Node* left, map<string, Symbol*> variables){
 	while (true){
 		int cur_token_priority = GetPriorityToken();
 		if (cur_token_priority < exp_priority){
@@ -640,12 +644,12 @@ Node* Parser::ParseBinary(int exp_priority, Node* left){
 		string op = cur_token.value;
 		SetNextToken();
 
-		Node* right = ParsePrimary();
+		Node* right = ParsePrimary(variables);
 		if (!right)
 			return 0;
 		int next_token_priority = GetPriorityToken();
 		if (cur_token_priority < next_token_priority){
-			right = ParseBinary(cur_token_priority, right);
+			right = ParseBinary(cur_token_priority, right, variables);
 			if (!right)
 				return 0;
 		}
@@ -666,9 +670,9 @@ Node* Parser::ParseFloat(){
 	return node;
 }
 
-Node* Parser::ParseIdent(){
+Node* Parser::ParseIdent(map<string, Symbol*> variables){
 	string name = cur_token.value;
-	if (!IssetIdent(name)){
+	if (!IssetIdent(name, variables)){
 		Error("identifier was not found");
 		return 0;
 	}
@@ -686,7 +690,7 @@ Node* Parser::ParseIdent(){
 	vector<Node*> args;
 	if (cur_token.value != ")"){
 		while (true){
-			Node* argument = ParseExpression();
+			Node* argument = ParseExpression(variables);
 			if (!argument)
 				return 0;
 			args.push_back(argument);
@@ -705,7 +709,7 @@ Node* Parser::ParseIdent(){
 
 Node* Parser::ParseParen(string paren){
 	SetNextToken();
-	Node* result = ParseExpression();
+	Node* result = ParseExpression(table_symbols);
 
 	if (!result) return 0;
 	if ((paren == "(") and (cur_token.value != ")")) return Error("expected ')'");
@@ -715,8 +719,8 @@ Node* Parser::ParseParen(string paren){
 	return result;
 }
 
-int Parser::IssetIdent(string name){
-	for(auto& item : table_symbols)
+int Parser::IssetIdent(string name, map<string, Symbol*> variables){
+	for(auto& item : variables)
     	if (item.first == name){
     		return 1;
     	}
