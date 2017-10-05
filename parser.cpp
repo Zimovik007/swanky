@@ -11,6 +11,9 @@
 #define T_separate 5
 #define T_reserved 6
 #define T_eof      7
+#define T_function 8
+#define T_record   9
+#define T_array    10
 
 using namespace std;
 
@@ -35,6 +38,35 @@ map<string, int> priority = {
 	{"IN", 2},
 	{":=", 1} 
 };
+
+int Parser::CheckTypes(map<string, Symbol*> variables){
+	int type = GetTypeOfToken(variables);
+	return 1;
+}
+
+int Parser::GetTypeOfToken(map<string, Symbol*> variables){
+	if (cur_token.GetType() == T_integer)
+		return cur_token.GetType();
+	if (cur_token.GetType() == T_float)
+		return cur_token.GetType();
+	if (cur_token.GetType() == T_literal)
+		return cur_token.GetType();	
+	if (cur_token.GetType() == T_ident)
+		return (variables.find(cur_token.value)->second)->GetType();
+	if (cur_token.GetType() == T_function)
+		return (variables.find(cur_token.value)->second)->GetReturnType();
+	return -1;
+}
+
+int Parser::StringTypeToInt(string type){
+	if (ToUpper(type) == "STRING")   return T_literal;
+	if (ToUpper(type) == "REAL")     return T_float;
+	if (ToUpper(type) == "FLOAT")    return T_float;
+	if (ToUpper(type) == "FUNCTION") return T_literal;
+	if (ToUpper(type) == "ARRAY")    return T_array;
+	if (ToUpper(type) == "RECORD")   return T_record;
+	return -1;
+}
 
 map<string, Symbol*> Parser::PushFromTableSymbols(string name, Symbol* symbol, map<string, Symbol*> table){
 	for(auto& item : table)
@@ -356,7 +388,6 @@ int Parser::ParseDefinitionRecord(){
 	}
 	used_type = 1;
 	SetNextToken();
-
 	while(true){
 		if (cur_token.GetType() == T_ident){
 			string record_name = cur_token.value;
@@ -486,7 +517,7 @@ int Parser::ParseDefinitionFunction(){
 						SetNextToken();
 						body_function = ParseBodyFunction(body_function->GetLocalVariables());
 						if (body_function){
-							Symbol* symbol = new FuncSymbol(func_param_map, func_param_vector, return_type, body_function);
+							Symbol* symbol = new FuncSymbol(func_param_map, func_param_vector, StringTypeToInt(return_type), body_function);
 							table_symbols = PushFromTableSymbols(func_name, symbol, table_symbols);
 						}
 					}
@@ -606,12 +637,13 @@ Node* Parser::ParsePrimary(map<string, Symbol*> variables){
 		SetNextToken();
 		return ParsePrimary(variables);
 	}
-	int type = cur_token.GetType();
+
+	int cur_type = cur_token.GetType();
 
 	if (cur_token.value == "(") return ParseParen("(");
-	if (type == T_integer ) 	return ParseInt();
-	if (type == T_float   ) 	return ParseFloat();
-	if (type == T_ident   ) 	return ParseIdent(variables);
+	if (cur_type == T_integer ) return ParseInt();
+	if (cur_type == T_float   ) return ParseFloat();
+	if (cur_type == T_ident   ) return ParseIdent(variables);
 	if (ToUpper(cur_token.value) == "END"){
 		SetNextToken();
 		if (cur_token.value == "."){

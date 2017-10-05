@@ -4,7 +4,7 @@ using namespace std;
 
 //VARIABLE INTEGER
 
-string VarIntSymbol::GetType(){
+int VarIntSymbol::GetType(){
 	return type;
 }
 
@@ -14,7 +14,7 @@ int VarIntSymbol::IsVar(){
 
 //VARIABLE FLOAT
 
-string VarFloatSymbol::GetType(){
+int VarFloatSymbol::GetType(){
 	return type;
 }
 
@@ -24,7 +24,7 @@ int VarFloatSymbol::IsVar(){
 
 //VARIABLE STRING
 
-string VarStringSymbol::GetType(){
+int VarStringSymbol::GetType(){
 	return type;
 }
 
@@ -34,7 +34,7 @@ int VarStringSymbol::IsVar(){
 
 //VARIABLE RECORD
 
-string VarRecordSymbol::GetType(){
+int VarRecordSymbol::GetType(){
 	return type;
 }
 
@@ -48,7 +48,7 @@ map<string, Symbol*> VarRecordSymbol::GetMapElements(){
 
 //VARIABLE ARRAY
 
-string VarArraySymbol::GetType(){
+int VarArraySymbol::GetType(){
 	return type;
 }
 
@@ -70,7 +70,7 @@ Symbol* VarArraySymbol::GetTypeElements(){
 
 //CONST INTEGER
 
-string ConstIntSymbol::GetType(){
+int ConstIntSymbol::GetType(){
 	return type;
 }
 
@@ -80,7 +80,7 @@ int ConstIntSymbol::IsVar(){
 
 //CONST FLOAT
 
-string ConstFloatSymbol::GetType(){
+int ConstFloatSymbol::GetType(){
 	return type;
 }
 
@@ -90,7 +90,7 @@ int ConstFloatSymbol::IsVar(){
 
 //CONST STRING
 
-string ConstStringSymbol::GetType(){
+int ConstStringSymbol::GetType(){
 	return type;
 }
 
@@ -100,7 +100,7 @@ int ConstStringSymbol::IsVar(){
 
 //CONST RECORD
 
-string ConstRecordSymbol::GetType(){
+int ConstRecordSymbol::GetType(){
 	return type;
 }
 
@@ -114,7 +114,7 @@ map<string, Symbol*> ConstRecordSymbol::GetMapElements(){
 
 //CONST ARRAY
 
-string ConstArraySymbol::GetType(){
+int ConstArraySymbol::GetType(){
 	return type;
 }
 
@@ -136,7 +136,7 @@ Symbol* ConstArraySymbol::GetTypeElements(){
 
 //FUNCTION
 
-string FuncSymbol::GetType(){
+int FuncSymbol::GetType(){
 	return type;
 }
 
@@ -152,6 +152,6 @@ vector<Symbol*> FuncSymbol::GetVecElements(){
 	return vec_params;
 }
 
-string FuncSymbol::GetReturnType(){
+int FuncSymbol::GetReturnType(){
 	return return_type;
 }

@@ -30,6 +30,9 @@ private:
 	int GetPriorityToken();
 	Symbol* GetSymbolTypeOfArray();
 	int IsType(string type);
+	int StringTypeToInt(string type);
+	int GetTypeOfToken(map<string, Symbol*> variables);
+	int CheckTypes(map<string, Symbol*> variables);
 	map<string, Symbol*> ProcessingTypes(int type, vector<string> idents, int is_var, map<string, Symbol*> table);
 	map<string, Symbol*> PushFromTableSymbols(string name, Symbol* symbol, map<string, Symbol*> table);
 	string ToUpper(string str);
