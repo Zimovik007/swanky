@@ -16,7 +16,10 @@ void LiteralNode::PrintNode(){
 }
 
 void IdentNode::PrintNode(){
-	cout << name << " ";
+	if (is_negative)
+		cout << "-" << name << " ";
+	else
+		cout << name << " ";
 }
 
 void BinaryNode::PrintNode(){
@@ -29,7 +32,10 @@ void BinaryNode::PrintNode(){
 
 void CallFuncNode::PrintNode(){
 	if (args.size()){
-		cout << " " << func_name << "( ";
+		if (is_negative)
+			cout << " -" << func_name << "( ";
+		else
+			cout << " " << func_name << "( ";
 		for (int i = 0; i < args.size() - 1; i++){
 			args[i]->PrintNode(); 
 			cout << ", ";
@@ -43,6 +49,8 @@ void CallFuncNode::PrintNode(){
 }
 
 void ArrayNode::PrintNode(){
+	if (is_negative) 
+		cout << "-";
 	cout << name_array << "[ ";
 	index->PrintNode();
 	cout << "] ";

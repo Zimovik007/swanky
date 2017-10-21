@@ -37,10 +37,11 @@ private:
 
 class IdentNode: public Node{
 public:
-	IdentNode(string var){ name = var; };
+	IdentNode(string var, int sign){ name = var; is_negative = sign; };
 	void PrintNode();
 private:
 	string name;
+	int is_negative;
 };
 
 class BinaryNode: public Node{
@@ -55,18 +56,20 @@ private:
 
 class CallFuncNode: public Node{
 public:
-	CallFuncNode(string name, vector<Node*> arguments){func_name = name; args = arguments;};
+	CallFuncNode(string name, vector<Node*> arguments, int sign){func_name = name; args = arguments; is_negative = sign; };
 	void PrintNode();
 private:
 	string func_name;
+	int is_negative;
 	vector<Node*> args;
 };
 
 class ArrayNode: public Node{
 public:
-	ArrayNode(string name, Node* i){name_array = name; index = i;};
+	ArrayNode(string name, Node* i, int sign){name_array = name; index = i; is_negative = sign; };
 	void PrintNode();
 private:
 	string name_array;
+	int is_negative;
 	Node* index;
 };

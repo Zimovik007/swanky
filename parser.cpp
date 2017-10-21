@@ -645,7 +645,7 @@ Node* Parser::ParsePrimary(map<string, Symbol*> variables){
 	if (cur_token.value == "-") { sign = 1; SetNextToken(); cur_type = cur_token.GetType();}
 	if (cur_type == T_integer ) return ParseInt(sign);
 	if (cur_type == T_float   ) return ParseFloat(sign);
-	if (cur_type == T_ident   ) return ParseIdent(variables);
+	if (cur_type == T_ident   ) return ParseIdent(variables, sign);
 	if (cur_type == T_literal ) return ParseLiteral();
 	if (ToUpper(cur_token.value) == "END"){
 		SetNextToken();
@@ -725,7 +725,7 @@ Node* Parser::ParseFloat(int sign){
 	}
 }
 
-Node* Parser::ParseIdent(map<string, Symbol*> variables){
+Node* Parser::ParseIdent(map<string, Symbol*> variables, int sign){
 	string name = cur_token.value;
 	if (!IssetIdent(name, variables)){
 		Error("identifier was not found");
@@ -734,11 +734,11 @@ Node* Parser::ParseIdent(map<string, Symbol*> variables){
 	SetNextToken();
 	if (cur_token.value != "("){
 		if (cur_token.value != "["){
-			Node* result = new IdentNode(name);
+			Node* result = new IdentNode(name, sign);
 			return result;
 		}
 		Node* index = ParseParen("[");
-		Node* result = new ArrayNode(name, index);
+		Node* result = new ArrayNode(name, index, sign);
 		return result;
 	}
 	SetNextToken();
@@ -758,7 +758,7 @@ Node* Parser::ParseIdent(map<string, Symbol*> variables){
 		}
 	}
 	SetNextToken();
-	Node* func = new CallFuncNode(name, args);
+	Node* func = new CallFuncNode(name, args, sign);
 	return func;
 }
 

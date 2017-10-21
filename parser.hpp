@@ -22,7 +22,7 @@ private:
 	Node* ParseExpression(map<string, Symbol*> variables);
 	Node* ParseInt(int sign);
 	Node* ParseFloat(int sign);
-	Node* ParseIdent(map<string, Symbol*> variables);
+	Node* ParseIdent(map<string, Symbol*> variables, int sign);
 	Node* ParseLiteral();
 	Node* ParseBinary(int priority, Node* left, map<string, Symbol*> variables);
 	Node* ParseParen(string paren);
