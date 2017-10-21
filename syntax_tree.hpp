@@ -27,6 +27,14 @@ private:
 	double value;
 };
 
+class LiteralNode: public Node{
+public:
+	LiteralNode(string val){ literal = val; };
+	void PrintNode();
+private:
+	string literal;
+};
+
 class IdentNode: public Node{
 public:
 	IdentNode(string var){ name = var; };

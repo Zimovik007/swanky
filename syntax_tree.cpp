@@ -11,6 +11,10 @@ void FloatNode::PrintNode(){
 	cout << value << " ";
 }
 
+void LiteralNode::PrintNode(){
+	cout << literal << " ";
+}
+
 void IdentNode::PrintNode(){
 	cout << name << " ";
 }

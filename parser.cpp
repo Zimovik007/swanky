@@ -640,10 +640,13 @@ Node* Parser::ParsePrimary(map<string, Symbol*> variables){
 
 	int cur_type = cur_token.GetType();
 
-	if (cur_token.value == "(") return ParseParen("(");
-	if (cur_type == T_integer ) return ParseInt();
-	if (cur_type == T_float   ) return ParseFloat();
+	int sign = 0;
+	if (cur_token.value == "(") return ParseParen("(");	
+	if (cur_token.value == "-") { sign = 1; SetNextToken(); cur_type = cur_token.GetType();}
+	if (cur_type == T_integer ) return ParseInt(sign);
+	if (cur_type == T_float   ) return ParseFloat(sign);
 	if (cur_type == T_ident   ) return ParseIdent(variables);
+	if (cur_type == T_literal ) return ParseLiteral();
 	if (ToUpper(cur_token.value) == "END"){
 		SetNextToken();
 		if (cur_token.value == "."){
@@ -690,16 +693,36 @@ Node* Parser::ParseBinary(int exp_priority, Node* left, map<string, Symbol*> var
 	}
 }
 
-Node* Parser::ParseInt(){
-	Node* node = new IntNode(cur_token.value);
+Node* Parser::ParseLiteral(){
+	Node* node = new LiteralNode(cur_token.value);
 	SetNextToken();
 	return node;
 }
 
-Node* Parser::ParseFloat(){
-	Node* node = new FloatNode(cur_token.value);
-	SetNextToken();
-	return node;
+Node* Parser::ParseInt(int sign){
+	if (sign){
+		Node* node = new IntNode("-" + cur_token.value);
+		SetNextToken();
+		return node;
+	}
+	else{ 
+		Node* node = new IntNode(cur_token.value);
+		SetNextToken();
+		return node;
+	}
+}
+
+Node* Parser::ParseFloat(int sign){
+	if (sign){
+		Node* node = new FloatNode("-" + cur_token.value);
+		SetNextToken();
+		return node;
+	}
+	else{
+		Node* node = new FloatNode(cur_token.value);
+		SetNextToken();
+		return node;
+	}
 }
 
 Node* Parser::ParseIdent(map<string, Symbol*> variables){
@@ -753,8 +776,7 @@ Node* Parser::ParseParen(string paren){
 
 int Parser::IssetIdent(string name, map<string, Symbol*> variables){
 	for(auto& item : variables)
-    	if (item.first == name){
+    	if (item.first == name)
     		return 1;
-    	}
     return 0;
 }

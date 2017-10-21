@@ -20,9 +20,10 @@ private:
 	Block* ParseBodyFunction(map<string, Symbol*> type);
 	Node* ParsePrimary(map<string, Symbol*> variables);
 	Node* ParseExpression(map<string, Symbol*> variables);
-	Node* ParseInt();
-	Node* ParseFloat();
+	Node* ParseInt(int sign);
+	Node* ParseFloat(int sign);
 	Node* ParseIdent(map<string, Symbol*> variables);
+	Node* ParseLiteral();
 	Node* ParseBinary(int priority, Node* left, map<string, Symbol*> variables);
 	Node* ParseParen(string paren);
 	void SetNextToken();
