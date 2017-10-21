@@ -84,6 +84,7 @@ int Parser::CheckTypes(Node* tree, map<string, Symbol*> variables){
 		left_type  = GetTypeNode(tree->GetLeftChild(),  variables);
 		right_type = GetTypeNode(tree->GetRightChild(), variables);
 		if (left_type == right_type) return 1;
+		Error("Wrong types. See: '" + IntTypeToString(left_type) + "' & '" + IntTypeToString(right_type) + "'", -1);
 		return 0;
 	}
 	else if (tree->GetType() == T_function){
@@ -118,6 +119,16 @@ int Parser::StringTypeToInt(string type){
 	if (ToUpper(type) == "ARRAY")    return T_array;
 	if (ToUpper(type) == "RECORD")   return T_record;
 	return -1;
+}
+
+string Parser::IntTypeToString(int type){
+	if (type == T_integer)  return "INTEGER";
+	if (type == T_float)    return "REAL";
+	if (type == T_literal)  return "STRING";
+	if (type == T_function) return "FUNCTION";
+	if (type == T_array)    return "ARRAY";
+	if (type == T_record)   return "RECORD";
+	return "UNDEFINED";
 }
 
 map<string, Symbol*> Parser::PushFromTableSymbols(string name, Symbol* symbol, map<string, Symbol*> table){
@@ -386,9 +397,7 @@ int Parser::ParseBodyProgramm(){
 		tree = ParseExpression(table_symbols);
 		if (tree){
 			tree->PrintNode();
-			if (!CheckTypes(tree, table_symbols)){
-				Error("Wrong types in previously expression", -1);
-			}
+			CheckTypes(tree, table_symbols);
 			cout << endl;
 		}
 		if (is_end) break;
@@ -623,7 +632,8 @@ int Parser::GetPriorityToken(){
 
 Node* Parser::Error(string str, int move){
 	if (move > -1) cur_token.PrintToken(0); 
-	cout <<  " |=> " << "Error: " << str << endl;
+	cout <<  " |=> " << "Error: " << str;
+	if (move > -1) cout << endl;
 	if ((cur_token.value != ";") && (cur_token.GetType() != T_eof))
 		SetNextToken();
 	if (move){

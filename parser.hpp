@@ -32,6 +32,7 @@ private:
 	Symbol* GetSymbolTypeOfArray();
 	int IsType(string type);
 	int StringTypeToInt(string type);
+	string IntTypeToString(int type);
 	int GetTypeOfToken(map<string, Symbol*> variables);
 	int CheckTypes(Node* tree, map<string, Symbol*> variables);
 	int GetTypeNode(Node* node, map<string, Symbol*> variables);
