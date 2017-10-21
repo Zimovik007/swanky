@@ -91,6 +91,7 @@ public:
 	void PrintNode();
 	int GetType();
 	Node* GetIndexNode();
+	string GetName();
 private:
 	string name_array;
 	int is_negative;

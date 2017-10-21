@@ -103,3 +103,7 @@ int ArrayNode::GetType(){
 Node* ArrayNode::GetIndexNode(){
 	return index;
 }
+
+string ArrayNode::GetName(){
+	return name_array;
+}

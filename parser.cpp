@@ -40,30 +40,34 @@ map<string, int> priority = {
 };
 
 int Parser::GetTypeNode(Node* node, map<string, Symbol*> variables){
-	if (node->GetType() == T_integer) return T_integer;
-	if (node->GetType() == T_float)   return T_float;
-	if (node->GetType() == T_literal) return T_literal;
-	if (node->GetType() == T_ident){
+	int type_node = node->GetType();
+	if (type_node == T_integer) return T_integer;
+	if (type_node == T_float)   return T_float;
+	if (type_node == T_literal) return T_literal;
+	if (type_node == T_ident){
 		if (IssetIdent(node->GetName(), variables))
 			return ((variables.find(node->GetName())->second)->GetType());
 		return -1;
 	}
-	if (node->GetType() == T_array){
-		Node* index = node->GetIndexNode();
-		if (GetTypeNode(index, variables) != T_integer){
-			Error("index of array must be integer", -1);
-			return -1;
-		}
-		if (IssetIdent(node->GetName(), variables))
+	if (type_node == T_array){
+		if (IssetIdent(node->GetName(), variables)){
+			Node* index = node->GetIndexNode();
+			if (GetTypeNode(index, variables) != T_integer){
+				Error("index of array must be integer", -1);
+				return -1;
+			}
 			return ((variables.find(node->GetName())->second)->GetTypeElements()->GetType());
+		}
 		return -1;	
 	}
-	if (node->GetType() == T_function){
-		if (IssetIdent(node->GetName(), variables))
+	if (type_node == T_function){
+		if (IssetIdent(node->GetName(), variables)){
+			
 			return ((variables.find(node->GetName())->second)->GetReturnType());
+		}
 		return -1;
 	}
-	if (node->GetType() == T_operator){
+	if (type_node == T_operator){
 		int left_type =  GetTypeNode(node->GetLeftChild(),  variables);
 		int right_type = GetTypeNode(node->GetRightChild(), variables); 
 		if (left_type == right_type) 
@@ -83,7 +87,7 @@ int Parser::CheckTypes(Node* tree, map<string, Symbol*> variables){
 		return 0;
 	}
 	else if (tree->GetType() == T_function){
-		left_type = T_function;
+		GetTypeNode(tree, variables);
 	}
 	else{
 		Error("expected a function call or expression", -1);
@@ -284,11 +288,6 @@ Symbol* Parser::GetSymbolTypeOfArray(){
 Parser::Parser(Scanner* scan){
 	scanner = scan;
 	SetNextToken();
-	used_var = 0;
-	used_const = 0;
-	used_begin = 0;
-	used_type = 0;
-	used_function = 0;
 	is_end = 0;
 	map<string, Symbol*> init;
 	types["INTEGER"] = init;
@@ -333,33 +332,12 @@ void Parser::Parse(){
 }
 
 int Parser::ParseVar(){
-	if (used_var){
-		Error("The 'var' previously", 0);
-		return 1;
-	}
-	if (used_function){
-		Error("The 'var' should be above the function declarations", 0);
-		return 1;
-	}
 	SetNextToken();
-	used_var = 1;
-	used_type = 1;
 	return ParseDefinitionIdent(1);
 }
 
 int Parser::ParseConst(){
-	if (used_const){
-		Error("The 'const' previously", 0);
-		return 1;
-	}
-	if (used_function){
-		Error("The 'const' should be above the function declarations", 0);
-		return 1;
-	}
 	SetNextToken();
-	used_const = 1;
-	used_type = 1;
-
 	return ParseDefinitionIdent(0);
 }
 
@@ -421,23 +399,6 @@ int Parser::ParseBodyProgramm(){
 }
 
 int Parser::ParseDefinitionRecord(){
-	if (used_type){
-		Error("The 'type' previously or should be placed above", 0);
-		return 1;
-	}
-	if (used_function){
-		Error("The 'type' should be above the function declarations", 0);
-		return 1;
-	}
-	if (used_const){
-		Error("The 'type' should be above the function declarations", 0);
-		return 1;
-	}
-	if (used_var){
-		Error("The 'type' should be above the function declarations", 0);
-		return 1;
-	}
-	used_type = 1;
 	SetNextToken();
 	while(true){
 		if (cur_token.GetType() == T_ident){
@@ -505,7 +466,6 @@ int Parser::ParseDefinitionRecord(){
 }
 
 int Parser::ParseDefinitionFunction(){
-	used_function = 1;
 	vector<string> name_idents;
 	SetNextToken();
 	if (cur_token.GetType() == T_ident){
