@@ -7,12 +7,24 @@ void IntNode::PrintNode(){
 	cout << value << " ";
 }
 
+int IntNode::GetType(){
+	return type;
+}
+
 void FloatNode::PrintNode(){
 	cout << value << " ";
 }
 
+int FloatNode::GetType(){
+	return type;
+}
+
 void LiteralNode::PrintNode(){
 	cout << literal << " ";
+}
+
+int LiteralNode::GetType(){
+	return type;
 }
 
 void IdentNode::PrintNode(){
@@ -22,12 +34,32 @@ void IdentNode::PrintNode(){
 		cout << name << " ";
 }
 
+int IdentNode::GetType(){
+	return type;
+}
+
+string IdentNode::GetName(){
+	return name;
+}
+
 void BinaryNode::PrintNode(){
 	cout << "[ ";
 	leftChild->PrintNode(); 
 	cout << op << " ";
 	rightChild->PrintNode();
 	cout << "] ";
+}
+
+int BinaryNode::GetType(){
+	return type;
+}
+
+Node* BinaryNode::GetLeftChild(){
+	return leftChild;
+}
+
+Node* BinaryNode::GetRightChild(){
+	return rightChild;
 }
 
 void CallFuncNode::PrintNode(){
@@ -48,10 +80,26 @@ void CallFuncNode::PrintNode(){
 	}
 }
 
+int CallFuncNode::GetType(){
+	return type;
+}
+
+string CallFuncNode::GetName(){
+	return func_name;
+}
+
 void ArrayNode::PrintNode(){
 	if (is_negative) 
 		cout << "-";
 	cout << name_array << "[ ";
 	index->PrintNode();
 	cout << "] ";
+}
+
+int ArrayNode::GetType(){
+	return type;
+}
+
+Node* ArrayNode::GetIndexNode(){
+	return index;
 }

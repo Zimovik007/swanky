@@ -39,8 +39,55 @@ map<string, int> priority = {
 	{":=", 1} 
 };
 
-int Parser::CheckTypes(map<string, Symbol*> variables){
-	int type = GetTypeOfToken(variables);
+int Parser::GetTypeNode(Node* node, map<string, Symbol*> variables){
+	if (node->GetType() == T_integer) return T_integer;
+	if (node->GetType() == T_float)   return T_float;
+	if (node->GetType() == T_literal) return T_literal;
+	if (node->GetType() == T_ident){
+		if (IssetIdent(node->GetName(), variables))
+			return ((variables.find(node->GetName())->second)->GetType());
+		return -1;
+	}
+	if (node->GetType() == T_array){
+		Node* index = node->GetIndexNode();
+		if (GetTypeNode(index, variables) != T_integer){
+			Error("index of array must be integer", -1);
+			return -1;
+		}
+		if (IssetIdent(node->GetName(), variables))
+			return ((variables.find(node->GetName())->second)->GetTypeElements()->GetType());
+		return -1;	
+	}
+	if (node->GetType() == T_function){
+		if (IssetIdent(node->GetName(), variables))
+			return ((variables.find(node->GetName())->second)->GetReturnType());
+		return -1;
+	}
+	if (node->GetType() == T_operator){
+		int left_type =  GetTypeNode(node->GetLeftChild(),  variables);
+		int right_type = GetTypeNode(node->GetRightChild(), variables); 
+		if (left_type == right_type) 
+			return left_type;
+		return -1;
+	}
+	return -1;
+}
+
+int Parser::CheckTypes(Node* tree, map<string, Symbol*> variables){
+	int left_type = -1;
+	int right_type = -1;
+	if (tree->GetType() == T_operator){
+		left_type  = GetTypeNode(tree->GetLeftChild(),  variables);
+		right_type = GetTypeNode(tree->GetRightChild(), variables);
+		if (left_type == right_type) return 1;
+		return 0;
+	}
+	else if (tree->GetType() == T_function){
+		left_type = T_function;
+	}
+	else{
+		Error("expected a function call or expression", -1);
+	}
 	return 1;
 }
 
@@ -59,6 +106,7 @@ int Parser::GetTypeOfToken(map<string, Symbol*> variables){
 }
 
 int Parser::StringTypeToInt(string type){
+	if (ToUpper(type) == "INTEGER")  return T_integer;
 	if (ToUpper(type) == "STRING")   return T_literal;
 	if (ToUpper(type) == "REAL")     return T_float;
 	if (ToUpper(type) == "FLOAT")    return T_float;
@@ -360,6 +408,9 @@ int Parser::ParseBodyProgramm(){
 		tree = ParseExpression(table_symbols);
 		if (tree){
 			tree->PrintNode();
+			if (!CheckTypes(tree, table_symbols)){
+				Error("Wrong types in previously expression", -1);
+			}
 			cout << endl;
 		}
 		if (is_end) break;
@@ -611,7 +662,7 @@ int Parser::GetPriorityToken(){
 }
 
 Node* Parser::Error(string str, int move){
-	cur_token.PrintToken(0); 
+	if (move > -1) cur_token.PrintToken(0); 
 	cout <<  " |=> " << "Error: " << str << endl;
 	if ((cur_token.value != ";") && (cur_token.GetType() != T_eof))
 		SetNextToken();
@@ -620,7 +671,7 @@ Node* Parser::Error(string str, int move){
 			SetNextToken();
 		}
 	}
-	else{
+	else if (move == 0){
 		while((cur_token.GetType() != T_eof) && (ToUpper(cur_token.value) != "VAR") && (ToUpper(cur_token.value) != "CONST") && (ToUpper(cur_token.value) != "FUNCTION") && (ToUpper(cur_token.value) != "TYPE") && (ToUpper(cur_token.value) != "BEGIN")){
 			SetNextToken();
 		}
