@@ -36,8 +36,8 @@ private:
 	int GetTypeOfToken(map<string, Symbol*> variables);
 	int CheckTypes(Node* tree, map<string, Symbol*> variables);
 	int GetTypeNode(Node* node, map<string, Symbol*> variables);
-	map<string, Symbol*> ProcessingTypes(int type, vector<string> idents, int is_var, map<string, Symbol*> table);
-	map<string, Symbol*> PushFromTableSymbols(string name, Symbol* symbol, map<string, Symbol*> table);
+	map<string, Symbol*> ProcessingTypes(int type, vector<string> idents, int is_var, map<string, Symbol*>& table);
+	void PushFromTableSymbols(string name, Symbol* symbol, map<string, Symbol*>& table);
 	string ToUpper(string str);
 	//Handle Error
 	Node* Error(string str, int move = 1);

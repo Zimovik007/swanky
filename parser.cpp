@@ -131,15 +131,14 @@ string Parser::IntTypeToString(int type){
 	return "UNDEFINED";
 }
 
-map<string, Symbol*> Parser::PushFromTableSymbols(string name, Symbol* symbol, map<string, Symbol*> table){
+void Parser::PushFromTableSymbols(string name, Symbol* symbol, map<string, Symbol*>& table){
 	for(auto& item : table)
     	if (item.first == name){
     		Error("identifier '" + name + "' duplicated");
-    		return table;
+    		return;
     	}
     table[name] = symbol;
     last_push_symbol_from_table_symbols = symbol;
-	return table;
 }
 
 int Parser::IsType(string type){
@@ -150,7 +149,7 @@ int Parser::IsType(string type){
 	return 0;
 }
 
-map<string, Symbol*> Parser::ProcessingTypes(int type, vector<string> idents, int is_var, map<string, Symbol*> table){
+map<string, Symbol*> Parser::ProcessingTypes(int type, vector<string> idents, int is_var, map<string, Symbol*>& table){
 	if (!type){
 		Error("It is not a type");
 		return table;
@@ -178,13 +177,13 @@ map<string, Symbol*> Parser::ProcessingTypes(int type, vector<string> idents, in
 									if (is_var){
 										for (int i = 0; i < idents.size(); i++){
 											Symbol* symbol = new VarArraySymbol(start_i, end_i, type_elem_array);
-											table = PushFromTableSymbols(idents[i], symbol, table);
+											PushFromTableSymbols(idents[i], symbol, table);
 										}
 									}
 									else{
 										for (int i = 0; i < idents.size(); i++){
 											Symbol* symbol = new ConstArraySymbol(start_i, end_i, type_elem_array);
-											table = PushFromTableSymbols(idents[i], symbol, table);
+											PushFromTableSymbols(idents[i], symbol, table);
 										}
 									}
 								}
@@ -227,11 +226,11 @@ map<string, Symbol*> Parser::ProcessingTypes(int type, vector<string> idents, in
 		for (int i = 0; i < idents.size(); i++){
 			if (is_var){
 				Symbol* symbol = new VarIntSymbol();
-				table = PushFromTableSymbols(idents[i], symbol, table);
+				PushFromTableSymbols(idents[i], symbol, table);
 			}
 			else{
 				Symbol* symbol = new ConstIntSymbol();
-				table = PushFromTableSymbols(idents[i], symbol, table);
+				PushFromTableSymbols(idents[i], symbol, table);
 			}
 		}
 	}
@@ -239,11 +238,11 @@ map<string, Symbol*> Parser::ProcessingTypes(int type, vector<string> idents, in
 		for (int i = 0; i < idents.size(); i++){
 			if (is_var){
 				Symbol* symbol = new VarFloatSymbol();
-				table = PushFromTableSymbols(idents[i], symbol, table);
+				PushFromTableSymbols(idents[i], symbol, table);
 			}
 			else{
 				Symbol* symbol = new ConstFloatSymbol();
-				table = PushFromTableSymbols(idents[i], symbol, table);
+				PushFromTableSymbols(idents[i], symbol, table);
 			}
 		}
 	}
@@ -251,11 +250,11 @@ map<string, Symbol*> Parser::ProcessingTypes(int type, vector<string> idents, in
 		for (int i = 0; i < idents.size(); i++){
 			if (is_var){
 				Symbol* symbol = new VarStringSymbol();
-				table = PushFromTableSymbols(idents[i], symbol, table);
+				PushFromTableSymbols(idents[i], symbol, table);
 			}
 			else{
 				Symbol* symbol = new ConstStringSymbol();
-				table = PushFromTableSymbols(idents[i], symbol, table);
+				PushFromTableSymbols(idents[i], symbol, table);
 			}
 		}
 	}
@@ -264,11 +263,11 @@ map<string, Symbol*> Parser::ProcessingTypes(int type, vector<string> idents, in
 			map<string, Symbol*> r_fields = record_fields.find(cur_token.value)->second;
 			if (is_var){
 				Symbol* symbol = new VarRecordSymbol(r_fields);
-				table = PushFromTableSymbols(idents[i], symbol, table);
+				PushFromTableSymbols(idents[i], symbol, table);
 			}
 			else{
 				Symbol* symbol = new ConstRecordSymbol(r_fields);
-				table = PushFromTableSymbols(idents[i], symbol, table);
+				PushFromTableSymbols(idents[i], symbol, table);
 			}
 		}		 
 	}
@@ -529,7 +528,8 @@ int Parser::ParseDefinitionFunction(){
 					vars = name_idents;
 					vars.push_back("result");
 					Block* body_function = new Block();
-					body_function->PushLocalVariables(ProcessingTypes(IsType(return_type), vars, 1, body_function->GetLocalVariables()));
+					map<string, Symbol*> local = body_function->GetLocalVariables();
+					body_function->PushLocalVariables(ProcessingTypes(IsType(return_type), vars, 1, local));
 					if (cur_token.value != ";"){
 						Error("expected ';'");
 					}
@@ -538,7 +538,7 @@ int Parser::ParseDefinitionFunction(){
 						body_function = ParseBodyFunction(body_function->GetLocalVariables());
 						if (body_function){
 							Symbol* symbol = new FuncSymbol(func_param_map, func_param_vector, StringTypeToInt(return_type), body_function);
-							table_symbols = PushFromTableSymbols(func_name, symbol, table_symbols);
+							PushFromTableSymbols(func_name, symbol, table_symbols);
 						}
 					}
 				}
@@ -580,7 +580,8 @@ Block* Parser::ParseBodyFunction(map<string, Symbol*> res){
 				}
 				if (cur_token.value == ":"){
 					SetNextToken();
-					body_function->PushLocalVariables(ProcessingTypes(IsType(cur_token.value), name_idents, 1, body_function->GetLocalVariables()));
+					map<string, Symbol*> local = body_function->GetLocalVariables();
+					body_function->PushLocalVariables(ProcessingTypes(IsType(cur_token.value), name_idents, 1, local));
 					if (cur_token.value == ";")	SetNextToken();
 				}
 				else{
